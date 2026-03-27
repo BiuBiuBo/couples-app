@@ -6,8 +6,6 @@ import Avatar from '@/components/Avatar';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
 import { signInWithGoogle, logout } from '@/lib/auth';
 import { ensureUserDocument, pairCouple } from '@/lib/db';
-import { getRedirectResult } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import styles from './page.module.css';
 
 const HEARTS = ['💕', '💖', '💗', '💓', '💝', '💞', '❤️', '🌹'];
@@ -30,24 +28,6 @@ export default function LandingPage() {
       router.push('/dashboard');
     }
   }, [profile, router]);
-
-  // Handle mobile redirect sign-in
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          setIsLoading(true);
-          await ensureUserDocument(result.user);
-        }
-      } catch (err) {
-        console.error("Redirect signIn error:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    handleRedirectResult();
-  }, []);
 
   // Floating hearts canvas
   useEffect(() => {
@@ -96,21 +76,39 @@ export default function LandingPage() {
     return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
   }, []);
 
+  // Handle Google Login Redirect Result (for Mobile)
+  useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const { handleRedirectResult } = await import('@/lib/auth');
+        const fbUser = await handleRedirectResult();
+        if (fbUser) {
+          setIsLoading(true);
+          await ensureUserDocument(fbUser);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error("Lỗi redirect:", err);
+      }
+    };
+    checkRedirect();
+  }, []);
+
   const handleGoogleLogin = async () => {
+    const isMessenger = /FBAN|FBAV/i.test(navigator.userAgent);
+    if (isMessenger) {
+      alert('🍎 Lưu ý: Trình duyệt của Messenger có thể chặn đăng nhập. Bạn hãy bấm vào nút ba chấm ở góc màn hình và chọn "Mở bằng trình duyệt" (Safari/Chrome) để dùng tốt nhất nhé!');
+    }
     setIsLoading(true);
     try {
       const fbUser = await signInWithGoogle();
       if (fbUser) {
-        // Desktop / popup logic (returns user immediately)
         await ensureUserDocument(fbUser);
       }
-      // Mobile / redirect logic will reload the page, so it's handled in the useEffect above
-    } catch (e: any) {
+      // If fbUser is null, it means it's redirecting (for mobile)
+    } catch (e) {
       console.error(e);
-      // We only alert if it's not a redirect pending
-      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-        alert('Đăng nhập thất bại: ' + e.message);
-      }
+      alert('Đăng nhập thất bại! Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
