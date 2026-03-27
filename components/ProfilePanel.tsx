@@ -393,10 +393,10 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
             </div>
 
             {/* Birthday */}
-            <div style={{ marginBottom: 14 }}>
+            <div style={{ marginBottom: 14, maxWidth: '100%', overflow: 'hidden' }}>
               <label className="label">Ngày sinh</label>
               <input type="date" className="input-field" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))}
-                max={new Date().toISOString().slice(0, 10)} />
+                max={new Date().toISOString().slice(0, 10)} style={{ width: '100%', minWidth: 0, maxWidth: '100%', display: 'block', WebkitAppearance: 'none' }} />
               {form.birthday && (
                 <div style={{ marginTop: 6, fontSize: 13, color: 'var(--pink-300)' }}>
                   {getAge(form.birthday)} tuổi · {getZodiac(form.birthday)}
