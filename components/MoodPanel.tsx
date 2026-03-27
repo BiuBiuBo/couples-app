@@ -81,8 +81,9 @@ export default function MoodPanel({ currentUser, partner, onNotify }: Props) {
 
         {/* Partner mood */}
         <div className="glass-card" style={{ padding: '20px 24px' }}>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
-            {partner?.avatar || '?'} {partner?.name || 'Người yêu'} — hôm nay
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 20, height: 20, borderRadius: '50%', overflow: 'hidden', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-glass)' }}><Avatar src={partner?.avatar || '?'} size={20} /></span>
+            {partner?.name || 'Người yêu'} — hôm nay
           </div>
           {partnerTodayMood ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
