@@ -84,6 +84,7 @@ export default function LandingPage() {
         const fbUser = await handleRedirectResult();
         if (fbUser) {
           setIsLoading(true);
+          setShowLoginModal(true); // Open modal to show pairing or wait for profile
           await ensureUserDocument(fbUser);
           setIsLoading(false);
         }
@@ -93,6 +94,15 @@ export default function LandingPage() {
     };
     checkRedirect();
   }, []);
+
+  // Auto-show modal if logged in but not paired (to avoid "back to home" feel)
+  useEffect(() => {
+    if (user && profile && !profile.coupleId && !showLoginModal) {
+      // optional: setShowLoginModal(true); 
+      // But maybe just let user click the button. 
+      // Let's at least keep it open if it was already open.
+    }
+  }, [user, profile, showLoginModal]);
 
   const handleGoogleLogin = async () => {
     const isMessenger = /FBAN|FBAV/i.test(navigator.userAgent);
@@ -233,6 +243,14 @@ export default function LandingPage() {
                   Miễn phí hoàn toàn. Không bao giờ đăng tải gì lên tường của bạn.
                 </p>
               </div>
+            )}
+
+            {/* STAGE: LOGGED IN BUT PROFILE STILL LOADING */}
+            {user && !profile && (
+               <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                 <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+                 <p style={{ color: 'var(--text-secondary)' }}>Đang chuẩn bị không gian...</p>
+               </div>
             )}
 
             {/* STAGE 2: LOGGED IN BUT NO COUPLE (PAIRING ROOM) */}
