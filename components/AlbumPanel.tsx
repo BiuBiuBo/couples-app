@@ -583,20 +583,17 @@ export default function AlbumPanel({ currentUser }: Props) {
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 1;
-          column-gap: 16px;
-          padding: 16px 16px 40px;
+          columns: 2;
+          column-gap: 8px; /* Tighter for mobile */
+          padding: 12px 10px 40px;
           max-width: 100%;
           margin: 0 auto;
         }
-        @media (min-width: 480px) {
-          .album-masonry-grid { columns: 2; column-gap: 20px; padding: 24px 24px 50px; }
-        }
-        @media (min-width: 768px) {
-          .album-masonry-grid { columns: 3; column-gap: 24px; }
+        @media (min-width: 600px) {
+          .album-masonry-grid { columns: 3; column-gap: 16px; padding: 24px 24px 50px; }
         }
         @media (min-width: 1024px) {
-          .album-masonry-grid { columns: 4; }
+          .album-masonry-grid { columns: 4; column-gap: 24px; }
         }
 
         /* Polaroid card */
@@ -604,12 +601,12 @@ export default function AlbumPanel({ currentUser }: Props) {
           break-inside: avoid;
           display: block;
           width: 100%;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
           cursor: pointer;
-          padding: 8px 8px 14px 8px;
+          padding: 5px 5px 12px 5px; /* Thinner border for mobile */
           background: #fff;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.5);
-          border-radius: 4px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+          border-radius: 3px;
           transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                       box-shadow 0.35s ease;
           position: relative;
