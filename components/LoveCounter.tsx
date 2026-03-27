@@ -122,21 +122,21 @@ export default function LoveCounter({ couple }: { couple: CoupleData }) {
       <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ filter: 'drop-shadow(0 0 10px rgba(255,77,136,0.8))', animation: 'floatHeart 3s ease-in-out infinite', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(255,77,136,0.5)' }}>
+            <div style={{ filter: 'drop-shadow(0 0 10px rgba(255,77,136,0.8))', animation: 'floatHeart 3s ease-in-out infinite', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(255,77,136,0.5)', flexShrink: 0 }}>
               <Avatar src={couple.user1.avatar} size={72} />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--pink-200)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--pink-200)', maxWidth: 100, textAlign: 'center', wordBreak: 'break-word', lineHeight: 1.3 }}>
               {couple.user1.nickname || couple.user1.name}
             </div>
           </div>
 
-          <div style={{ fontSize: 56, filter: 'drop-shadow(0 0 20px rgba(255,77,136,1))', margin: '0 -8px', zIndex: 1, transform: 'translateY(-14px)' }} className="animate-heartbeat">💖</div>
+          <div style={{ fontSize: 48, filter: 'drop-shadow(0 0 20px rgba(255,77,136,1))', flexShrink: 0, marginBottom: 24 }} className="animate-heartbeat">💖</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ filter: 'drop-shadow(0 0 10px rgba(193,84,249,0.8))', animation: 'floatHeart 3s ease-in-out infinite 1.5s', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(193,84,249,0.5)' }}>
+            <div style={{ filter: 'drop-shadow(0 0 10px rgba(193,84,249,0.8))', animation: 'floatHeart 3s ease-in-out infinite 1.5s', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(193,84,249,0.5)', flexShrink: 0 }}>
               <Avatar src={couple.user2.avatar} size={72} />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--purple-200)', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--purple-200)', textShadow: '0 1px 3px rgba(0,0,0,0.5)', maxWidth: 100, textAlign: 'center', wordBreak: 'break-word', lineHeight: 1.3 }}>
               {couple.user2.nickname || couple.user2.name}
             </div>
           </div>
