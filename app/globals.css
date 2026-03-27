@@ -450,10 +450,14 @@ textarea.input-field { resize: vertical; min-height: 100px; }
 }
 
 @media (max-width: 768px) {
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  /* Stack 2-columns to 1-column on mobile for components like MoodPanel */
+  .grid-2 { grid-template-columns: 1fr; }
   .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
 
-  .page-container { padding: 12px; }
+  .page-container { padding: 12px; overflow-x: hidden; }
+  
+  /* Prevent unbroken strings from blowing up flex/grid containers */
+  * { min-width: 0; overflow-wrap: break-word; word-wrap: break-word; }
   
   /* Dashboard overrides */
   .dashboard-main { margin-left: 0 !important; }
