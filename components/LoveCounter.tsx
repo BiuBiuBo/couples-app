@@ -120,7 +120,7 @@ export default function LoveCounter({ couple }: { couple: CoupleData }) {
 
       {/* Title & Start Date */}
       <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', justifyContent: 'center', marginBottom: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ filter: 'drop-shadow(0 0 10px rgba(255,77,136,0.8))', animation: 'floatHeart 3s ease-in-out infinite', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(255,77,136,0.5)', flexShrink: 0 }}>
               <Avatar src={couple.user1.avatar} size={72} />
@@ -130,7 +130,7 @@ export default function LoveCounter({ couple }: { couple: CoupleData }) {
             </div>
           </div>
 
-          <div style={{ fontSize: 48, filter: 'drop-shadow(0 0 20px rgba(255,77,136,1))', flexShrink: 0, marginBottom: 24 }} className="animate-heartbeat">💖</div>
+          <div style={{ fontSize: 48, filter: 'drop-shadow(0 0 20px rgba(255,77,136,1))', flexShrink: 0, marginTop: 12 }} className="animate-heartbeat">💖</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ filter: 'drop-shadow(0 0 10px rgba(193,84,249,0.8))', animation: 'floatHeart 3s ease-in-out infinite 1.5s', width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-card)', border: '2px solid rgba(193,84,249,0.5)', flexShrink: 0 }}>
