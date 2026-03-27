@@ -5,22 +5,28 @@ const provider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async () => {
   try {
-    // Detect mobile/in-app browsers to use Redirect instead of Popup
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isMessenger = /FBAN|FBAV/i.test(navigator.userAgent);
+    const isMessenger = /FBAN|FBAV|Zalo|Instagram/i.test(navigator.userAgent);
+    
+    // Always attempt with Persistence first
+    await setPersistence(auth, indexedDBLocalPersistence);
 
-    if (isMobile || isMessenger) {
-      // Use indexedDBLocalPersistence for best Safari/iOS support
-      await setPersistence(auth, indexedDBLocalPersistence);
+    // If it's a known restricted In-App browser, we still need Redirect 
+    // but the user is advised to use Safari.
+    // However, on real Safari, Popup works better for some projects.
+    if (isMessenger) {
       await signInWithRedirect(auth, provider);
       return null;
     }
 
-    await setPersistence(auth, indexedDBLocalPersistence);
     const result = await signInWithPopup(auth, provider);
     return result.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Lỗi đăng nhập Google:", error);
+    // Fallback to redirect if popup is blocked
+    if (error.code === 'auth/popup-blocked') {
+        await signInWithRedirect(auth, provider);
+        return null;
+    }
     throw error;
   }
 };
