@@ -40,12 +40,14 @@ export const pairCouple = async (myUser: UserProfile, partnerCode: string): Prom
     throw new Error('Người này đã được ghép đôi với ai đó rùi 😢');
   }
 
-  // 2. Create the couple document
+  // 2. Create the couple document (include user profiles so dashboard can render)
   const coupleId = 'couple_' + generateId();
   const coupleData = {
     id: coupleId,
     user1Id: myUser.id,
     user2Id: partnerUser.id,
+    user1: myUser,
+    user2: partnerUser,
     startDate: new Date().toISOString().slice(0, 16),
     relationshipName: 'Chúng Mình',
   };

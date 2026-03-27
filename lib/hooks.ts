@@ -39,9 +39,21 @@ export function useCouple(coupleId?: string) {
 
   useEffect(() => {
     if (!coupleId) return;
-    return onSnapshot(doc(db, 'couples', coupleId), (snap) => {
-      if (snap.exists()) setCouple(snap.data() as CoupleData);
-      else setCouple(null);
+    return onSnapshot(doc(db, 'couples', coupleId), async (snap) => {
+      if (!snap.exists()) { setCouple(null); return; }
+      const data = snap.data() as CoupleData;
+
+      // If user profiles are missing (old couple docs), fetch them manually
+      if (!data.user1 || !data.user2) {
+        const [u1snap, u2snap] = await Promise.all([
+          import('firebase/firestore').then(({ getDoc, doc: fdoc }) => getDoc(fdoc(db, 'users', data.user1Id))),
+          import('firebase/firestore').then(({ getDoc, doc: fdoc }) => getDoc(fdoc(db, 'users', data.user2Id))),
+        ]);
+        data.user1 = u1snap.exists() ? u1snap.data() as any : { id: data.user1Id, name: 'Người yêu', avatar: '🌸', email: '', provider: 'google' };
+        data.user2 = u2snap.exists() ? u2snap.data() as any : { id: data.user2Id, name: 'Người yêu', avatar: '🌸', email: '', provider: 'google' };
+      }
+
+      setCouple(data);
     });
   }, [coupleId]);
 
