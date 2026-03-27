@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import { useState, useRef } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -250,12 +250,15 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
       quote: form.quote.trim() || '',
     };
     
-    // strip undefined
-    Object.keys(updated).forEach(k => updated[k as keyof UserProfile] === undefined && delete updated[k as keyof UserProfile]);
+      // strip undefined
+      Object.keys(updated).forEach(k => updated[k as keyof UserProfile] === undefined && delete updated[k as keyof UserProfile]);
 
-    await updateDoc(doc(db, 'users', currentUser.id), updated);
-    onUpdate({ ...currentUser, ...updated });
-    setEditing(false);
+      await updateDoc(doc(db, 'users', currentUser.id), updated);
+      onUpdate({ ...currentUser, ...updated });
+      setEditing(false);
+    } catch (error: any) {
+      console.error(error);
+      alert("❌ Lưu thất bại: " + (error.message || "Không rõ nguyên nhân. Hãy kiểm tra lại kết nối mạng hoặc kho lưu trữ Firebase."));
     } finally {
       setIsSaving(false);
     }
