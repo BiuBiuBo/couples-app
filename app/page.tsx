@@ -106,9 +106,20 @@ export default function LandingPage() {
   }, [user, profile, showLoginModal]);
 
   const handleGoogleLogin = async () => {
-    const isMessenger = /FBAN|FBAV/i.test(navigator.userAgent);
-    if (isMessenger) {
-      alert('🍎 Lưu ý: Trình duyệt của Messenger có thể chặn đăng nhập. Bạn hãy bấm vào nút ba chấm ở góc màn hình và chọn "Mở bằng trình duyệt" (Safari/Chrome) để dùng tốt nhất nhé!');
+    const ua = navigator.userAgent;
+    const isMessenger = /FBAN|FBAV/i.test(ua);
+    const isZalo = /Zalo/i.test(ua);
+    const isInstagram = /Instagram/i.test(ua);
+    const isInApp = isMessenger || isZalo || isInstagram;
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    if (isInApp) {
+      if (isIOS) {
+        alert('🍎 CẢNH BÁO BẢO MẬT: Google không cho phép đăng nhập bên trong ứng dụng này.\n\nBạn hãy bấm vào biểu tượng "Ba chấm (...)" hoặc "La bàn" ở góc màn hình và chọn "MỞ BẰNG TRÌNH DUYỆT" (Safari) để tiếp tục nhé!');
+      } else {
+        alert('🌐 CẢNH BÁO BẢO MẬT: Trình duyệt này không được Google hỗ trợ.\n\nBạn hãy bấm vào nút ba chấm ở góc màn hình và chọn "Mở bằng trình duyệt" (Chrome/Edge) để đăng nhập nhé!');
+      }
+      return;
     }
     setIsLoading(true);
     try {
