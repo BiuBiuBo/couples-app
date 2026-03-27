@@ -84,12 +84,15 @@ export default function LandingPage() {
         const fbUser = await handleRedirectResult();
         if (fbUser) {
           setIsLoading(true);
-          setShowLoginModal(true); // Open modal to show pairing or wait for profile
+          setShowLoginModal(true); 
           await ensureUserDocument(fbUser);
           setIsLoading(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Lỗi redirect:", err);
+        if (err.code !== 'auth/popup-closed-by-user') {
+          alert('🍎 Lỗi iOS/Safari: ' + (err.message || 'Vui lòng thử lại bằng trình duyệt Safari gốc!'));
+        }
       }
     };
     checkRedirect();
@@ -114,9 +117,9 @@ export default function LandingPage() {
         await ensureUserDocument(fbUser);
       }
       // If fbUser is null, it means it's redirecting (for mobile)
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert('Đăng nhập thất bại! Vui lòng thử lại.');
+      alert('Đăng nhập thất bại: ' + (e.code || e.message || 'Lỗi không xác định'));
     } finally {
       setIsLoading(false);
     }
