@@ -6,6 +6,8 @@ import Avatar from '@/components/Avatar';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
 import { signInWithGoogle, logout } from '@/lib/auth';
 import { ensureUserDocument, pairCouple } from '@/lib/db';
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import styles from './page.module.css';
 
 const HEARTS = ['💕', '💖', '💗', '💓', '💝', '💞', '❤️', '🌹'];
@@ -28,6 +30,24 @@ export default function LandingPage() {
       router.push('/dashboard');
     }
   }, [profile, router]);
+
+  // Handle mobile redirect sign-in
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setIsLoading(true);
+          await ensureUserDocument(result.user);
+        }
+      } catch (err) {
+        console.error("Redirect signIn error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    handleRedirectResult();
+  }, []);
 
   // Floating hearts canvas
   useEffect(() => {
@@ -80,11 +100,17 @@ export default function LandingPage() {
     setIsLoading(true);
     try {
       const fbUser = await signInWithGoogle();
-      await ensureUserDocument(fbUser);
-      // Let useEffect handle redirect or pairing screen will show
-    } catch (e) {
+      if (fbUser) {
+        // Desktop / popup logic (returns user immediately)
+        await ensureUserDocument(fbUser);
+      }
+      // Mobile / redirect logic will reload the page, so it's handled in the useEffect above
+    } catch (e: any) {
       console.error(e);
-      alert('Đăng nhập thất bại! Vui lòng thử lại.');
+      // We only alert if it's not a redirect pending
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        alert('Đăng nhập thất bại: ' + e.message);
+      }
     } finally {
       setIsLoading(false);
     }
