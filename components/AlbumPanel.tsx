@@ -583,15 +583,20 @@ export default function AlbumPanel({ currentUser }: Props) {
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 2;
+          columns: 1;
           column-gap: 16px;
-          padding: 24px 20px 40px;
+          padding: 16px 16px 40px;
+          max-width: 100%;
+          margin: 0 auto;
         }
-        @media (min-width: 640px) {
-          .album-masonry-grid { columns: 3; column-gap: 20px; padding: 32px 32px 60px; }
+        @media (min-width: 480px) {
+          .album-masonry-grid { columns: 2; column-gap: 20px; padding: 24px 24px 50px; }
+        }
+        @media (min-width: 768px) {
+          .album-masonry-grid { columns: 3; column-gap: 24px; }
         }
         @media (min-width: 1024px) {
-          .album-masonry-grid { columns: 4; column-gap: 24px; }
+          .album-masonry-grid { columns: 4; }
         }
 
         /* Polaroid card */
