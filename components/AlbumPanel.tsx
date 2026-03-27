@@ -80,10 +80,11 @@ export default function AlbumPanel({ currentUser }: Props) {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!selectedAlbum || !files.length) return;
-    // Read → compress → queue for captioning
+    // Bỏ qua nén ảnh, giữ nguyên chất lượng gốc (Original Quality)
     const promises = files.map(file => new Promise<string>(resolve => {
       const reader = new FileReader();
-      reader.onload = () => compressImage(reader.result as string).then(resolve);
+      // Gửi thẳng file gốc dưới dạng DataURL để Cloudinary xử lý
+      reader.onload = () => resolve(reader.result as string);
       reader.readAsDataURL(file);
     }));
     Promise.all(promises).then(urls => {
@@ -112,6 +113,9 @@ export default function AlbumPanel({ currentUser }: Props) {
       notify(currentUser.coupleId, currentUser, 'photo_add', `${currentUser.name} vừa thêm ảnh mới vào album “${selectedAlbum.name}”`, 'albums');
       setUploadQueue(rest);
       setUploadCaption('');
+    } catch (e: any) {
+      console.error(e);
+      alert(`Lỗi khi tải ảnh: ${e.message}. Vui lòng kiểm tra lại Cloudinary Preset!`);
     } finally {
       setIsUploading(false);
     }
@@ -135,6 +139,9 @@ export default function AlbumPanel({ currentUser }: Props) {
       await mutators.updateDoc(currentUser.coupleId, 'albums', selectedAlbum.id, { ...latestAlbum, photos: [...latestAlbum.photos, photo] });
       setUploadQueue(rest);
       setUploadCaption('');
+    } catch (e: any) {
+      console.error(e);
+      alert(`Lỗi tải ảnh: ${e.message}. Kiểm tra Cloudinary Preset!`);
     } finally {
       setIsUploading(false);
     }
