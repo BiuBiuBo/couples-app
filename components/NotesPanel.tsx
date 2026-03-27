@@ -5,6 +5,7 @@ import { useNotes, mutators } from '@/lib/hooks';
 import { notify } from '@/lib/notify';
 import { formatDate, generateId } from '@/lib/utils';
 import type { Note, UserProfile } from '@/lib/types';
+import Avatar from '@/components/Avatar';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; }
 
@@ -136,7 +137,7 @@ export default function NotesPanel({ currentUser, partner }: Props) {
                 {note.content}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span>{fromAvatar(note.fromUserId)}</span>
+                <span><Avatar src={fromAvatar(note.fromUserId)} size={16} /></span>
                 <span>{fromName(note.fromUserId)}</span>
                 <span style={{ marginLeft: 'auto' }}>{formatDate(note.createdAt)}</span>
               </div>

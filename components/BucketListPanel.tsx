@@ -5,6 +5,7 @@ import { useBucketList, mutators } from '@/lib/hooks';
 import { notify } from '@/lib/notify';
 import { generateId } from '@/lib/utils';
 import type { BucketItem, UserProfile } from '@/lib/types';
+import Avatar from '@/components/Avatar';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; }
 
@@ -163,8 +164,8 @@ export default function BucketListPanel({ currentUser, partner }: Props) {
                 {CATEGORIES.find(c => c.id === item.category)?.emoji}
               </span>
 
-              <span style={{ fontSize: 18, flexShrink: 0 }} title={item.addedBy === currentUser.id ? currentUser.name : partner?.name}>
-                {getUserAvatar(item.addedBy)}
+              <span style={{ flexShrink: 0 }} title={item.addedBy === currentUser.id ? currentUser.name : partner?.name}>
+                <Avatar src={getUserAvatar(item.addedBy)} size={24} />
               </span>
 
               <button className="btn-icon" onClick={() => deleteItem(item.id)}

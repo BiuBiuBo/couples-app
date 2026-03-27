@@ -68,7 +68,7 @@ export default function PromisesPanel({ currentUser, partner }: Props) {
           color: p.isFulfilled ? 'var(--text-muted)' : 'var(--text-primary)',
         }}>{p.text}</p>
         <div style={{ display: 'flex', gap: 10, fontSize: 12, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-          <span>{fromAvatar(p.fromUserId)} {fromName(p.fromUserId)}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Avatar src={fromAvatar(p.fromUserId)} size={16} /> {fromName(p.fromUserId)}</span>
           <span>· {formatDate(p.createdAt)}</span>
           {p.isFulfilled && p.fulfilledAt && (
             <span style={{ color: '#22c55e' }}>· ✓ Đã giữ lời {formatDate(p.fulfilledAt)}</span>
@@ -128,7 +128,7 @@ export default function PromisesPanel({ currentUser, partner }: Props) {
           {partnerPromises.length > 0 && (
             <div>
               <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-                {partner?.avatar || '?'} Lời hứa của {partner?.name || 'Người yêu'}
+                <span style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-glass)' }}><Avatar src={partner?.avatar || '?'} size={18} /></span> Lời hứa của {partner?.name || 'Người yêu'}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {partnerPromises.map(p => <PromiseCard key={p.id} p={p} />)}
