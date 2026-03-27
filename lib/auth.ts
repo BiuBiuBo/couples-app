@@ -1,5 +1,5 @@
 import { auth } from './firebase';
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, setPersistence, indexedDBLocalPersistence } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
 
@@ -10,13 +10,13 @@ export const signInWithGoogle = async () => {
     const isMessenger = /FBAN|FBAV/i.test(navigator.userAgent);
 
     if (isMobile || isMessenger) {
-      // Force persistence to handle Safari/iOS redirects better
-      await setPersistence(auth, browserLocalPersistence);
+      // Use indexedDBLocalPersistence for best Safari/iOS support
+      await setPersistence(auth, indexedDBLocalPersistence);
       await signInWithRedirect(auth, provider);
       return null;
     }
 
-    await setPersistence(auth, browserLocalPersistence);
+    await setPersistence(auth, indexedDBLocalPersistence);
     const result = await signInWithPopup(auth, provider);
     return result.user;
   } catch (error) {
