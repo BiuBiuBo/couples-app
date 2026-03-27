@@ -43,6 +43,17 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  // Khôi phục màn hình đang xem nếu tải lại trang
+  useEffect(() => {
+    const saved = localStorage.getItem('cm_activeTab') as ActiveView;
+    if (saved && NAV_ITEMS.some(i => i.id === saved)) setActiveView(saved);
+  }, []);
+
+  // Lưu lại mỗi khi chuyển màn hình
+  useEffect(() => {
+    localStorage.setItem('cm_activeTab', activeView);
+  }, [activeView]);
+
   // Derived state
   const today = new Date();
   const upcomingCount = anniversaries.filter(a => {
