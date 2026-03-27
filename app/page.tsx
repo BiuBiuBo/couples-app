@@ -98,9 +98,7 @@ export default function LandingPage() {
   // Auto-show modal if logged in but not paired (to avoid "back to home" feel)
   useEffect(() => {
     if (user && profile && !profile.coupleId && !showLoginModal) {
-      // optional: setShowLoginModal(true); 
-      // But maybe just let user click the button. 
-      // Let's at least keep it open if it was already open.
+      setShowLoginModal(true);
     }
   }, [user, profile, showLoginModal]);
 
