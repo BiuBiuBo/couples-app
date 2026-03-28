@@ -274,24 +274,63 @@ textarea.input-field { resize: vertical; min-height: 100px; }
   animation: float 8s ease-in-out infinite;
 }
 
-/* Toast notification */
-.toast {
+/* --- Toast Notification System --- */
+.toast-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  padding: 14px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-pink);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 14px;
-  z-index: 9999;
-  animation: slideInRight 0.3s ease;
-  box-shadow: var(--shadow-card);
-  max-width: 320px;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  width: 90%;
+  max-width: 400px;
 }
-.toast.success { border-color: #22c55e; }
-.toast.error { border-color: var(--rose-500); }
+
+.toast {
+  pointer-events: auto;
+  background: rgba(13, 8, 16, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: toast-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  width: 100%;
+}
+
+.toast-success { border-left: 4px solid #10b981; }
+.toast-error { border-left: 4px solid #ef4444; }
+.toast-warning { border-left: 4px solid #f59e0b; }
+.toast-info { border-left: 4px solid #3b82f6; }
+
+.toast-icon { font-size: 18px; }
+.toast-message { font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; line-height: 1.4; color: #f3f4f6; }
+
+@keyframes toast-in-up {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+@media (max-width: 768px) {
+  .toast-container {
+    top: auto;
+    bottom: 30px;
+  }
+}
 
 .welcome-overlay {
   position: fixed;

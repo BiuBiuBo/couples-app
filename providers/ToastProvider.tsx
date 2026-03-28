@@ -30,7 +30,7 @@ export function useToast() {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
+  
   const show = useCallback((message: string, type: ToastType = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -63,58 +63,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           </div>
         ))}
       </div>
-
-      <style jsx global>{`
-        .toast-container {
-          position: fixed;
-          top: 24px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 10000;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-          pointer-events: none;
-          width: 90%;
-          max-width: 400px;
-        }
-
-        .toast {
-          pointer-events: auto;
-          background: rgba(13, 8, 16, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: white;
-          padding: 12px 20px;
-          border-radius: 16px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          animation: toast-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          width: 100%;
-        }
-
-        .toast-success { border-left: 4px solid #10b981; }
-        .toast-error { border-left: 4px solid #ef4444; }
-        .toast-warning { border-left: 4px solid #f59e0b; }
-        .toast-info { border-left: 4px solid #3b82f6; }
-
-        .toast-icon { font-size: 18px; }
-        .toast-message { font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; line-height: 1.4; color: #f3f4f6; }
-
-        @keyframes toast-in-up {
-          from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes toast-out {
-          from { opacity: 1; transform: translateY(0); }
-          to { opacity: 0; transform: translateY(-10px); }
-        }
-      `}</style>
     </ToastContext.Provider>
   );
 }
