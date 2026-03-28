@@ -24,7 +24,31 @@ export default function AlbumPanel({ currentUser }: Props) {
   // Pending upload queue: show caption modal before saving
   const [uploadQueue, setUploadQueue] = useState<{ url: string }[]>([]);
   const [uploadCaption, setUploadCaption] = useState('');
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, currentIndex: number, total: number) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        // Swipe Left -> Next
+        setEditingCaption(null);
+        setLightboxIndex((currentIndex + 1) % total);
+      } else {
+        // Swipe Right -> Prev
+        setEditingCaption(null);
+        setLightboxIndex((currentIndex - 1 + total) % total);
+      }
+    }
+    setTouchStartX(null);
+  };
   const captionInputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSaveName = async () => {
@@ -397,7 +421,10 @@ export default function AlbumPanel({ currentUser }: Props) {
 
       {/* Interactive Lightbox / Slideshow */}
       {lightboxIndex !== null && selectedAlbum.photos[lightboxIndex] && (
-        <div className="modal-overlay" onClick={() => setLightboxIndex(null)}
+        <div className="modal-overlay" 
+          onClick={() => setLightboxIndex(null)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={(e) => handleTouchEnd(e, lightboxIndex, selectedAlbum.photos.length)}
           style={{ background: 'rgba(10, 5, 12, 0.95)', backdropFilter: 'blur(10px)' }}>
 
           {/* Close Header */}
