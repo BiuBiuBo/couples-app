@@ -186,7 +186,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
   const [showUnpairConfirm, setShowUnpairConfirm] = useState(false);
   const [isUnpairing, setIsUnpairing] = useState(false);
   const [showLinkPass, setShowLinkPass] = useState(false);
-  const [newPass, setNewPass] = useState('');
+  const [newPass, setNewPass] = useState('BeUyenXinhDep');
   const [isLinking, setIsLinking] = useState(false);
   const [linkError, setLinkError] = useState('');
 

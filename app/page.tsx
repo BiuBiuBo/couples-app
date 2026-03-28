@@ -91,7 +91,13 @@ export default function LandingPage() {
         if (fbUser) {
           setIsLoading(true);
           setShowLoginModal(true); 
-          await ensureUserDocument(fbUser);
+          const { profile: userProfile, isNew } = await ensureUserDocument(fbUser);
+          // Auto link password on redirect result too, only for EXISTING users
+          const hasPassword = fbUser.providerData.some(p => p.providerId === 'password');
+          if (!isNew && !hasPassword && fbUser.email) {
+            const { linkEmailPassword } = await import('@/lib/auth');
+            await linkEmailPassword('BeUyenXinhDep');
+          }
           setIsLoading(false);
         }
       } catch (err: any) {
@@ -132,7 +138,18 @@ export default function LandingPage() {
     try {
       const fbUser = await signInWithGoogle();
       if (fbUser) {
-        await ensureUserDocument(fbUser);
+        const { profile: userProfile, isNew } = await ensureUserDocument(fbUser);
+        // Tự động thiết lập mật khẩu mặc định nếu là TÀI KHOẢN CŨ và chưa có mật khẩu
+        const hasPassword = fbUser.providerData.some(p => p.providerId === 'password');
+        if (!isNew && !hasPassword && fbUser.email) {
+          try {
+            const { linkEmailPassword } = await import('@/lib/auth');
+            await linkEmailPassword('BeUyenXinhDep');
+            console.log('Đã tự động liên kết mật khẩu mặc định cho tài khoản cũ');
+          } catch (err) {
+            console.error('Không thể tự động liên kết mật khẩu:', err);
+          }
+        }
       }
     } catch (e: any) {
       console.error(e);

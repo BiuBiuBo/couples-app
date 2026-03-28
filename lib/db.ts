@@ -4,11 +4,11 @@ import type { UserProfile, CoupleData } from './types';
 import { generateId, generateInviteCode } from './utils';
 
 // Helper: Ensure user document exists
-export const ensureUserDocument = async (user: any): Promise<UserProfile> => {
+export const ensureUserDocument = async (user: any): Promise<{ profile: UserProfile, isNew: boolean }> => {
   const userRef = doc(db, 'users', user.uid);
   const snap = await getDoc(userRef);
   if (snap.exists()) {
-    return snap.data() as UserProfile;
+    return { profile: snap.data() as UserProfile, isNew: false };
   }
   
   const newUser: UserProfile & { inviteCode: string } = {
@@ -20,7 +20,7 @@ export const ensureUserDocument = async (user: any): Promise<UserProfile> => {
     inviteCode: generateInviteCode(), // for pairing
   };
   await setDoc(userRef, newUser);
-  return newUser;
+  return { profile: newUser, isNew: true };
 };
 
 // Unpair a couple
