@@ -275,10 +275,13 @@ export default function AlbumPanel({ currentUser }: Props) {
 
   // Album detail view
   return (
-    <div className="space-galaxy-bg" style={{ minHeight: 'calc(100vh - 100px)' }}>
-      <div className="nebula-glow" />
-      <div className="space-stars" />
-      <div className="space-stars-2" />
+    <div className="space-galaxy-bg" style={{ minHeight: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column', overflow: 'visible' }}>
+      {/* Galaxy Background Base Layer (Non-clipping container) */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0, borderRadius: 'inherit' }}>
+        <div className="nebula-glow" />
+        <div className="space-stars" />
+        <div className="space-stars-2" />
+      </div>
 
       {/* Header */}
       <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, flexWrap: 'wrap', padding: '24px 24px 0 24px' }}>
@@ -583,13 +586,16 @@ export default function AlbumPanel({ currentUser }: Props) {
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 2;
-          column-gap: 8px; /* Tighter for mobile */
-          padding: 12px 10px 40px;
+          columns: 1; /* Default to 1 for smallest screens */
+          column-gap: 12px;
+          padding: 12px 12px 40px;
           max-width: 100%;
           margin: 0 auto;
         }
-        @media (min-width: 600px) {
+        @media (min-width: 440px) {
+          .album-masonry-grid { columns: 2; column-gap: 12px; }
+        }
+        @media (min-width: 768px) {
           .album-masonry-grid { columns: 3; column-gap: 16px; padding: 24px 24px 50px; }
         }
         @media (min-width: 1024px) {
@@ -620,7 +626,7 @@ export default function AlbumPanel({ currentUser }: Props) {
           border-radius: 20px;
           border: 1px solid var(--border-glass);
           background: linear-gradient(135deg, #090310 0%, #170824 50%, #0d0614 100%);
-          overflow: hidden;
+          /* overflow: hidden; - Removed to allow scrolling on mobile */
           min-height: 500px;
           box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
         }
