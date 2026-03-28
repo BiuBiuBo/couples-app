@@ -2,9 +2,12 @@
 
 import { useState, useRef } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { formatDate, uploadImageString } from '@/lib/utils';
+import { unpairCouple } from '@/lib/db';
+import { linkEmailPassword, logout } from '@/lib/auth';
 import type { UserProfile } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   currentUser: UserProfile;
@@ -175,8 +178,19 @@ function ProfileCard({ user, isMe, onEdit }: { user: UserProfile; isMe: boolean;
 }
 
 export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) {
+  const router = useRouter();
   const [tab, setTab] = useState<'me' | 'partner'>('me');
   const [editing, setEditing] = useState(false);
+  
+  // Unpair & Linking States
+  const [showUnpairConfirm, setShowUnpairConfirm] = useState(false);
+  const [isUnpairing, setIsUnpairing] = useState(false);
+  const [showLinkPass, setShowLinkPass] = useState(false);
+  const [newPass, setNewPass] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [linkError, setLinkError] = useState('');
+
+  const hasPassword = auth.currentUser?.providerData.some(p => p.providerId === 'password');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [form, setForm] = useState({
     name: currentUser.name,
@@ -202,7 +216,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
         // Since we don't have a loading state yet, let's just upload directly
         // User could click save early though. Let's do it inside saveProfile!
         // No, let's keep it here so they preview it, and upload right away. Wait, they might cancel!
-        setForm(f => ({ ...f, avatar: compressed }));
+        setForm((f: any) => ({ ...f, avatar: compressed }));
         setShowEmojiPicker(false);
       };
       reader.readAsDataURL(file);
@@ -264,6 +278,40 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
     }
   };
 
+  const handleUnpair = async () => {
+    setIsUnpairing(true);
+    try {
+      await unpairCouple(currentUser.id, partner?.id || '');
+      // Redirect to landing
+      router.push('/');
+      window.location.reload(); // Force refresh to clear state
+    } catch (err: any) {
+      alert("Lỗi khi hủy ghép đôi: " + err.message);
+    } finally {
+      setIsUnpairing(false);
+      setShowUnpairConfirm(false);
+    }
+  };
+
+  const handleLinkPass = async () => {
+    if (newPass.length < 6) {
+      setLinkError("Mật khẩu phải ít nhất 6 ký tự");
+      return;
+    }
+    setIsLinking(true);
+    setLinkError('');
+    try {
+      await linkEmailPassword(newPass);
+      alert("✅ Đã thiết lập mật khẩu thành công! Giờ bạn có thể đăng nhập bằng email và mật khẩu này.");
+      setShowLinkPass(false);
+      setNewPass('');
+    } catch (err: any) {
+      setLinkError(err.message || "Lỗi liên kết mật khẩu");
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
   const TabLabel = ({ user }: { user: UserProfile }) => (
     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <span style={{
@@ -312,6 +360,96 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
         partner
           ? <ProfileCard user={partner} isMe={false} />
           : <div className="empty-state"><div className="empty-icon">💌</div><p>Chưa có người yêu trong app!</p></div>
+      )}
+
+      {/* Danger Zone / Extra Actions */}
+      {tab === 'me' && (
+        <div style={{ marginTop: 40, paddingTop: 30, borderTop: '1px solid var(--border-glass)' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: 'var(--text-primary)' }}>⚙️ Cài đặt nâng cao</h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Password Link */}
+            {!hasPassword && (
+              <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>Thiết lập mật khẩu</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Giúp bạn đăng nhập mà không cần Google</div>
+                </div>
+                <button className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }} onClick={() => setShowLinkPass(true)}>
+                  Thiết lập
+                </button>
+              </div>
+            )}
+
+            {/* Unpair button */}
+            <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, borderColor: 'rgba(255, 77, 136, 0.2)' }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--rose-400)' }}>Hủy ghép đôi</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Ngắt kết nối với đối phương</div>
+              </div>
+              <button className="btn-ghost" style={{ fontSize: 13, padding: '8px 16px', color: 'var(--rose-400)', border: '1px solid var(--rose-900)' }} 
+                onClick={() => setShowUnpairConfirm(true)}>
+                Hủy kết đôi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Set Password Modal */}
+      {showLinkPass && (
+        <div className="modal-overlay" onClick={() => !isLinking && setShowLinkPass(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <h3 className="playfair" style={{ fontSize: 20, marginBottom: 12 }}>🔐 Thiết lập mật khẩu</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+              Bạn đang đăng nhập bằng Google. Hãy đặt mật khẩu để có thể đăng nhập bằng email <b>{currentUser.email}</b> trong tương lai.
+            </p>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label className="label">Mật khẩu mới</label>
+              <input 
+                autoFocus
+                type="password" 
+                className="input-field" 
+                placeholder="Tối thiểu 6 ký tự" 
+                value={newPass}
+                onChange={e => setNewPass(e.target.value)}
+              />
+              {linkError && <div style={{ color: 'var(--rose-400)', fontSize: 13, marginTop: 8 }}>⚠️ {linkError}</div>}
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowLinkPass(false)} disabled={isLinking}>Hủy</button>
+              <button className="btn-primary" style={{ flex: 1 }} onClick={handleLinkPass} disabled={isLinking}>
+                {isLinking ? 'Đang lưu...' : 'Xác nhận'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unpair Confirmation Modal */}
+      {showUnpairConfirm && (
+        <div className="modal-overlay" onClick={() => !isUnpairing && setShowUnpairConfirm(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400, textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>💔</div>
+            <h3 className="playfair" style={{ fontSize: 22, marginBottom: 12 }}>Hủy ghép đôi?</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
+              Hành động này sẽ ngắt kết nối giữa bạn và <b>{partner?.name || 'người ấy'}</b>. <br/>
+              Bạn vẫn có thể kết nối lại sau này bằng mã mời, nhưng hiện tại cả hai sẽ trở về màn hình chờ.
+            </p>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowUnpairConfirm(false)} disabled={isUnpairing}>Có lẽ là không</button>
+              <button className="btn-primary" 
+                style={{ flex: 1, background: 'var(--gradient-rose)', border: 'none' }} 
+                onClick={handleUnpair} 
+                disabled={isUnpairing}>
+                {isUnpairing ? 'Đang xử lý...' : 'Xác nhận hủy'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Edit modal */}
@@ -384,11 +522,11 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
             <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
               <div style={{ flex: 1 }}>
                 <label className="label">Tên</label>
-                <input className="input-field" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Tên của bạn" />
+                <input className="input-field" value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} placeholder="Tên của bạn" />
               </div>
               <div style={{ flex: 1 }}>
                 <label className="label">Tên gọi thân mật</label>
-                <input className="input-field" value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} placeholder='VD: "Mèo béo"' />
+                <input className="input-field" value={form.nickname} onChange={e => setForm((f: any) => ({ ...f, nickname: e.target.value }))} placeholder='VD: "Mèo béo"' />
               </div>
             </div>
 
@@ -430,7 +568,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
               <label className="label">Ngôn ngữ tình yêu</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {LOVE_LANGUAGES.map(ll => (
-                  <button key={ll.id} onClick={() => setForm(f => ({ ...f, loveLanguage: f.loveLanguage === ll.id ? '' : ll.id }))}
+                  <button key={ll.id} onClick={() => setForm((f: any) => ({ ...f, loveLanguage: f.loveLanguage === ll.id ? '' : ll.id }))}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                       borderRadius: 10, cursor: 'pointer', textAlign: 'left',
@@ -452,7 +590,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
             {/* Quote */}
             <div style={{ marginBottom: 24 }}>
               <label className="label">Câu nói yêu thích</label>
-              <textarea className="input-field" rows={2} value={form.quote} onChange={e => setForm(f => ({ ...f, quote: e.target.value }))}
+              <textarea className="input-field" rows={2} value={form.quote} onChange={e => setForm((f: any) => ({ ...f, quote: e.target.value }))}
                 placeholder='VD: "Tình yêu không phải là nhìn nhau, mà là cùng nhìn về một hướng"' />
             </div>
 

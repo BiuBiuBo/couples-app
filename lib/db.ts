@@ -16,11 +16,27 @@ export const ensureUserDocument = async (user: any): Promise<UserProfile> => {
     name: user.displayName || 'Người yêu mới',
     avatar: user.photoURL || '🌸', // default emoji if no photo
     email: user.email || '',
-    provider: 'google',
+    provider: user.providerId === 'password' ? 'email' : 'google',
     inviteCode: generateInviteCode(), // for pairing
   };
   await setDoc(userRef, newUser);
   return newUser;
+};
+
+// Unpair a couple
+export const unpairCouple = async (myUserId: string, partnerId: string): Promise<void> => {
+  // 1. Remove connection from both user documents
+  await updateDoc(doc(db, 'users', myUserId), {
+    coupleId: null,
+    partnerId: null,
+  });
+
+  if (partnerId) {
+    await updateDoc(doc(db, 'users', partnerId), {
+      coupleId: null,
+      partnerId: null,
+    });
+  }
 };
 
 // Create a new Couple Pairing

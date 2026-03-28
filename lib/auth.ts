@@ -1,5 +1,10 @@
 import { auth } from './firebase';
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, setPersistence, indexedDBLocalPersistence } from 'firebase/auth';
+import { 
+  GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, 
+  signOut, setPersistence, indexedDBLocalPersistence,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
+  EmailAuthProvider, linkWithCredential
+} from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
 
@@ -46,6 +51,41 @@ export const logout = async () => {
     await signOut(auth);
   } catch (error) {
     console.error("Lỗi đăng xuất:", error);
+    throw error;
+  }
+};
+
+export const signInWithEmail = async (email: string, pass: string) => {
+  try {
+    const res = await signInWithEmailAndPassword(auth, email, pass);
+    return res.user;
+  } catch (error) {
+    console.error("Lỗi đăng nhập Email:", error);
+    throw error;
+  }
+};
+
+export const signUpWithEmail = async (email: string, pass: string, name: string) => {
+  try {
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(res.user, { displayName: name });
+    return res.user;
+  } catch (error) {
+    console.error("Lỗi đăng ký Email:", error);
+    throw error;
+  }
+};
+
+export const linkEmailPassword = async (pass: string) => {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error("Không tìm thấy người dùng hoặc email.");
+  
+  try {
+    const credential = EmailAuthProvider.credential(user.email, pass);
+    await linkWithCredential(user, credential);
+    return user;
+  } catch (error) {
+    console.error("Lỗi liên kết Email/Password:", error);
     throw error;
   }
 };

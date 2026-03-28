@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
-import { signInWithGoogle, logout } from '@/lib/auth';
+import { signInWithGoogle, logout, signInWithEmail, signUpWithEmail } from '@/lib/auth';
 import { ensureUserDocument, pairCouple } from '@/lib/db';
 import styles from './page.module.css';
 
@@ -21,6 +21,12 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [partnerCode, setPartnerCode] = useState('');
   const [pairingError, setPairingError] = useState('');
+
+  // Email Auth State
+  const [emailForm, setEmailForm] = useState({ email: '', password: '', name: '' });
+  const [authMethod, setAuthMethod] = useState<'google' | 'email'>('google');
+  const [emailMode, setEmailMode] = useState<'signin' | 'signup'>('signin');
+  const [authError, setAuthError] = useState('');
 
   // Auto redirect to dashboard if paired
   useEffect(() => {
@@ -122,15 +128,51 @@ export default function LandingPage() {
       return;
     }
     setIsLoading(true);
+    setAuthError('');
     try {
       const fbUser = await signInWithGoogle();
       if (fbUser) {
         await ensureUserDocument(fbUser);
       }
-      // If fbUser is null, it means it's redirecting (for mobile)
     } catch (e: any) {
       console.error(e);
-      alert('Đăng nhập thất bại: ' + (e.code || e.message || 'Lỗi không xác định'));
+      setAuthError(e.code === 'auth/popup-closed-by-user' ? '' : (e.message || 'Lỗi đăng nhập Google'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailForm.email || !emailForm.password) return;
+    if (emailMode === 'signup' && !emailForm.name) {
+      setAuthError('Vui lòng nhập tên của bạn');
+      return;
+    }
+
+    setIsLoading(true);
+    setAuthError('');
+    try {
+      let fbUser;
+      if (emailMode === 'signin') {
+        fbUser = await signInWithEmail(emailForm.email, emailForm.password);
+      } else {
+        fbUser = await signUpWithEmail(emailForm.email, emailForm.password, emailForm.name);
+      }
+      
+      if (fbUser) {
+        await ensureUserDocument(fbUser);
+      }
+    } catch (e: any) {
+      console.error(e);
+      let msg = 'Lỗi xác thực';
+      if (e.code === 'auth/user-not-found') msg = 'Tài khoản không tồn tại.';
+      else if (e.code === 'auth/wrong-password') msg = 'Mật khẩu không chính xác.';
+      else if (e.code === 'auth/email-already-in-use') msg = 'Email này đã được sử dụng.';
+      else if (e.code === 'auth/weak-password') msg = 'Mật khẩu quá yếu (tối thiểu 6 ký tự).';
+      else if (e.code === 'auth/invalid-email') msg = 'Email không hợp lệ.';
+      else msg = e.message || msg;
+      setAuthError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -232,27 +274,103 @@ export default function LandingPage() {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 48, marginBottom: 12 }}>💕</div>
                 <h2 className="playfair" style={{ fontSize: 24, marginBottom: 8 }}>Mở khóa Không gian</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
-                  Đăng nhập bằng Google để bảo mật kỷ niệm của hai bạn trên đám mây.
+                <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 24 }}>
+                  {authMethod === 'google' 
+                    ? 'Đăng nhập bằng Google để bảo mật kỷ niệm của hai bạn trên đám mây.'
+                    : emailMode === 'signin' ? 'Đăng nhập vào tài khoản của bạn' : 'Tạo tài khoản mới cho hai bạn'}
                 </p>
 
-                <button
-                  onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-                    padding: '16px 20px', background: 'white', color: '#333',
-                    border: 'none', borderRadius: 'var(--radius-md)', width: '100%',
-                    cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'var(--transition)',
-                    fontWeight: 600, fontSize: 15, fontFamily: 'Inter, sans-serif',
-                  }}
-                >
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: 20, height: 20 }} />
-                  {isLoading ? 'Đang kết nối...' : 'Tiếp tục với Google'}
-                </button>
+                {authMethod === 'google' ? (
+                  <>
+                    <button
+                      onClick={handleGoogleLogin}
+                      disabled={isLoading}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                        padding: '16px 20px', background: 'white', color: '#333',
+                        border: 'none', borderRadius: 'var(--radius-md)', width: '100%',
+                        cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'var(--transition)',
+                        fontWeight: 600, fontSize: 15, fontFamily: 'Inter, sans-serif',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      }}
+                    >
+                      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: 20, height: 20 }} />
+                      {isLoading ? 'Đang kết nối...' : 'Tiếp tục với Google'}
+                    </button>
+                    <button 
+                      onClick={() => { setAuthMethod('email'); setAuthError(''); }}
+                      className="btn-ghost" style={{ marginTop: 12, width: '100%', fontSize: 14 }}>
+                      📧 Đăng nhập bằng Email
+                    </button>
+                  </>
+                ) : (
+                  <form onSubmit={handleEmailAuth} style={{ textAlign: 'left' }}>
+                    {emailMode === 'signup' && (
+                      <div style={{ marginBottom: 12 }}>
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>TÊN CỦA BẠN</label>
+                        <input 
+                          autoFocus
+                          className="input-field"
+                          placeholder="Tên hoặc biệt danh..."
+                          value={emailForm.name}
+                          onChange={e => setEmailForm({ ...emailForm, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                    )}
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>EMAIL</label>
+                      <input 
+                        className="input-field"
+                        type="email"
+                        placeholder="example@gmail.com"
+                        value={emailForm.email}
+                        onChange={e => setEmailForm({ ...emailForm, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>MẬT KHẨU</label>
+                      <input 
+                        className="input-field"
+                        type="password"
+                        placeholder="••••••••"
+                        value={emailForm.password}
+                        onChange={e => setEmailForm({ ...emailForm, password: e.target.value })}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+
+                    {authError && <div style={{ color: 'var(--rose-400)', fontSize: 13, marginBottom: 16 }}>⚠️ {authError}</div>}
+
+                    <button className="btn-primary" style={{ width: '100%', padding: '14px' }} disabled={isLoading}>
+                      {isLoading ? 'Đang xử lý...' : (emailMode === 'signin' ? 'Đăng nhập' : 'Đăng ký ngay')}
+                    </button>
+
+                    <div style={{ marginTop: 20, textAlign: 'center', fontSize: 13 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {emailMode === 'signin' ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
+                      </span>
+                      <button 
+                        type="button"
+                        onClick={() => { setEmailMode(emailMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); }}
+                        style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                        {emailMode === 'signin' ? 'Đăng ký' : 'Đăng nhập'}
+                      </button>
+                    </div>
+
+                    <button 
+                      type="button"
+                      onClick={() => { setAuthMethod('google'); setAuthError(''); }}
+                      className="btn-ghost" style={{ marginTop: 12, width: '100%', fontSize: 14 }}>
+                      ← Quay lại đăng nhập Google
+                    </button>
+                  </form>
+                )}
                 
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 20 }}>
-                  Miễn phí hoàn toàn. Không bao giờ đăng tải gì lên tường của bạn.
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 24 }}>
+                  Dữ liệu của bạn được mã hóa và bảo mật trên Google Firebase.
                 </p>
               </div>
             )}

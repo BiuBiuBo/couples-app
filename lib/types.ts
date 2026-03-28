@@ -5,7 +5,7 @@ export interface UserProfile {
   name: string;
   avatar: string; // emoji or base64
   email: string;
-  provider: 'google' | 'facebook' | 'demo';
+  provider: 'google' | 'facebook' | 'email' | 'demo';
   // Extended personal info
   nickname?: string;
   birthday?: string; // YYYY-MM-DD
