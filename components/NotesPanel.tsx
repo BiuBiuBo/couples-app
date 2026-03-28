@@ -38,9 +38,9 @@ export default function NotesPanel({ currentUser, partner }: Props) {
         content: form.content.trim(),
         mood: form.mood,
         isTimeCapsule: form.isTimeCapsule,
-        openDate: form.isTimeCapsule ? form.openDate : undefined,
         createdAt: new Date().toISOString(),
         isRead: false,
+        ...(form.isTimeCapsule && form.openDate ? { openDate: form.openDate } : {}),
       };
       await mutators.addDoc(currentUser.coupleId, 'notes', note);
       notify(currentUser.coupleId, currentUser, 'note_add', `${currentUser.name} vừa gửi một ghi chú mới: “${note.mood} ${form.title.trim()}”`, 'notes');
