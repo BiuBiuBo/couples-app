@@ -587,9 +587,9 @@ export default function AlbumPanel({ currentUser }: Props) {
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 2; /* Back to 2 columns for mobile as requested */
-          column-gap: 8px;
-          padding: 12px 10px 40px;
+          columns: 2; /* Keep 2 columns as requested */
+          column-gap: 6px; /* Tighten for mobile */
+          padding: 8px 8px 40px;
           max-width: 100%;
           margin: 0 auto;
         }
@@ -605,17 +605,20 @@ export default function AlbumPanel({ currentUser }: Props) {
           break-inside: avoid;
           display: block;
           width: 100%;
-          margin-bottom: 12px;
+          margin-bottom: 8px; /* Slightly tighter on mobile */
           cursor: pointer;
-          padding: 5px 5px 12px 5px; /* Thinner border for mobile */
+          padding: 3px 3px 10px 3px; /* Smaller border on mobile for better fit */
           background: #fff;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-          border-radius: 3px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          border-radius: 2px;
           transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                       box-shadow 0.35s ease;
           position: relative;
           z-index: 1;
           will-change: transform;
+        }
+        @media (min-width: 600px) {
+          .photo-polaroid { padding: 5px 5px 12px 5px; border-radius: 3px; margin-bottom: 20px; }
         }
 
         /* Space Galaxy Background */
@@ -624,7 +627,7 @@ export default function AlbumPanel({ currentUser }: Props) {
           border-radius: 20px;
           border: 1px solid var(--border-glass);
           background: linear-gradient(135deg, #090310 0%, #170824 50%, #0d0614 100%);
-          /* overflow: hidden; - Removed to allow scrolling on mobile */
+          overflow-y: initial; /* Ensure vertical scrolling is never blocked */
           min-height: 500px;
           box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
         }
