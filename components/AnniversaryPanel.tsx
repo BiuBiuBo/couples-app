@@ -53,6 +53,7 @@ export default function AnniversaryPanel({ couple, currentUser, onRefresh }: Pro
   const deleteItem = async (id: string) => {
     if (!couple || !couple.id) return;
     await mutators.deleteDoc(couple.id, 'anniversaries', id);
+    toast.info('Đã xóa ngày kỷ niệm.');
   };
 
   const sorted = [...items].sort((a, b) => daysUntil(a.date, a.isRecurring) - daysUntil(b.date, b.isRecurring));

@@ -91,8 +91,8 @@ export default function AlbumPanel({ currentUser }: Props) {
       coverEmoji: newAlbumEmoji, createdAt: new Date().toISOString(), photos: [],
     };
     await mutators.addDoc(currentUser.coupleId, 'albums', album);
-    notify(currentUser.coupleId, currentUser, 'album_create', `${currentUser.name} vừa tạo album mới: “${newAlbumEmoji} ${newAlbumName.trim()}”`, 'albums');
     setNewAlbumName(''); setShowNewAlbum(false);
+    toast.success('Đã tạo album mới thành công! 📁✨');
   };
 
   /** Compress image via Canvas before storing in localStorage */
@@ -175,9 +175,10 @@ export default function AlbumPanel({ currentUser }: Props) {
       await mutators.updateDoc(currentUser.coupleId, 'albums', selectedAlbum.id, { ...latestAlbum, photos: [...latestAlbum.photos, photo] });
       setUploadQueue(rest);
       setUploadCaption('');
+      toast.success('Đã tải ảnh lên thành công! 📸');
     } catch (e: any) {
       console.error(e);
-      alert(`Lỗi tải ảnh: ${e.message}. Kiểm tra Cloudinary Preset!`);
+      toast.error(`Lỗi tải ảnh: ${e.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -189,6 +190,7 @@ export default function AlbumPanel({ currentUser }: Props) {
     await mutators.deleteDoc(currentUser.coupleId, 'albums', id);
     if (album) notify(currentUser.coupleId, currentUser, 'album_delete', `${currentUser.name} đã xóa album “${album.coverEmoji} ${album.name}”`);
     setSelectedAlbumId(null);
+    toast.info('Đã xóa album kỷ niệm.');
   };
 
   const deletePhoto = async (photoId: string) => {
@@ -197,6 +199,7 @@ export default function AlbumPanel({ currentUser }: Props) {
     await mutators.updateDoc(currentUser.coupleId, 'albums', selectedAlbum.id, updated);
     notify(currentUser.coupleId, currentUser, 'photo_delete', `${currentUser.name} đã xóa một ảnh khỏi album “${selectedAlbum.name}”`);
     setLightboxIndex(null);
+    toast.info('Đã xóa ảnh kỷ niệm.');
   };
 
   // Keyboard navigation for lightbox

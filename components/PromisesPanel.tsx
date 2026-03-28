@@ -42,6 +42,7 @@ export default function PromisesPanel({ currentUser, partner }: Props) {
   const deletePromise = async (id: string) => { 
     if (!currentUser.coupleId) return;
     await mutators.deleteDoc(currentUser.coupleId, 'promises', id);
+    toast.info('Đã xóa lời hứa.');
   };
 
   const fromName = (uid: string) => uid === currentUser.id ? currentUser.name : (partner?.name || 'Người yêu');
