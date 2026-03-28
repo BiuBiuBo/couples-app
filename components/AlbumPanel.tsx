@@ -374,8 +374,8 @@ export default function AlbumPanel({ currentUser }: Props) {
               <div style={{ textAlign: 'center', paddingTop: 6, paddingBottom: 2 }}>
                 {photo.caption ? (
                   <p style={{
-                    fontSize: 11, color: '#555', fontStyle: 'italic',
-                    margin: 0, lineHeight: 1.3,
+                    fontSize: 10, color: '#555', fontStyle: 'italic',
+                    margin: 0, lineHeight: 1.2,
                     overflow: 'hidden', display: '-webkit-box',
                     WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
                   }}>{photo.caption}</p>
@@ -591,9 +591,9 @@ export default function AlbumPanel({ currentUser }: Props) {
         /* Masonry polaroid grid */
         .album-masonry-grid {
           columns: 2;
-          column-width: 140px; /* Encourage 2 columns on small screens */
-          column-gap: 4px;
-          padding: 8px 16px 40px; /* More side padding to shrink the photos */
+          column-width: 120px; /* Force small columns */
+          column-gap: 8px;
+          padding: 8px 30px 40px; /* Heavy side padding to shrink the grid */
           max-width: 100%;
           margin: 0 auto;
         }
@@ -609,9 +609,9 @@ export default function AlbumPanel({ currentUser }: Props) {
           break-inside: avoid;
           display: block;
           width: 100%;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
           cursor: pointer;
-          padding: 2px 2px 8px 2px; /* Super thin border for mobile */
+          padding: 6px 6px 14px 6px; /* Thick polaroid border makes the image itself smaller */
           background: #fff;
           box-shadow: 0 4px 10px rgba(0,0,0,0.3);
           border-radius: 2px;
