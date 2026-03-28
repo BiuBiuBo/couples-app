@@ -590,9 +590,10 @@ export default function AlbumPanel({ currentUser }: Props) {
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 2; /* Keep 2 columns as requested */
-          column-gap: 6px; /* Tighten for mobile */
-          padding: 8px 8px 40px;
+          columns: 2;
+          column-width: 140px; /* Encourage 2 columns on small screens */
+          column-gap: 4px;
+          padding: 8px 16px 40px; /* More side padding to shrink the photos */
           max-width: 100%;
           margin: 0 auto;
         }
@@ -608,11 +609,11 @@ export default function AlbumPanel({ currentUser }: Props) {
           break-inside: avoid;
           display: block;
           width: 100%;
-          margin-bottom: 8px; /* Slightly tighter on mobile */
+          margin-bottom: 6px;
           cursor: pointer;
-          padding: 3px 3px 10px 3px; /* Smaller border on mobile for better fit */
+          padding: 2px 2px 8px 2px; /* Super thin border for mobile */
           background: #fff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
           border-radius: 2px;
           transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                       box-shadow 0.35s ease;
