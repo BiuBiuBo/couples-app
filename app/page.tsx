@@ -290,7 +290,7 @@ export default function LandingPage() {
 
       {/* Auth & Pairing Modal */}
       {showLoginModal && (
-        <div className="modal-overlay" onClick={() => !isLoading && setShowLoginModal(false)}>
+        <div className="modal-overlay" onClick={() => { if (!isLoading) { setShowLoginModal(false); setResetEmailSent(false); } }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             
             {/* STAGE 1: NOT LOGGED IN */}
@@ -403,7 +403,7 @@ export default function LandingPage() {
                       {emailMode === 'forgot' ? (
                         <button 
                           type="button"
-                          onClick={() => { setEmailMode('signin'); setAuthError(''); }}
+                          onClick={() => { setEmailMode('signin'); setAuthError(''); setResetEmailSent(false); }}
                           style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                           Quay lại đăng nhập
                         </button>
@@ -414,7 +414,7 @@ export default function LandingPage() {
                           </span>
                           <button 
                             type="button"
-                            onClick={() => { setEmailMode(emailMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); }}
+                            onClick={() => { setEmailMode(emailMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); setResetEmailSent(false); }}
                             style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                             {emailMode === 'signin' ? 'Đăng ký' : 'Đăng nhập'}
                           </button>
