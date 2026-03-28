@@ -346,16 +346,19 @@ export default function AlbumPanel({ currentUser }: Props) {
               style={{ 
                 animation: `floatGentle ${t.animDuration}s ease-in-out infinite alternate`,
                 animationDelay: `${t.animDelay}s`,
-                transform: `rotate(${t.rotateZ}deg)`,
-                position: 'relative', // Ensure top works
-              }}
+                '--rotate-deg': `${t.rotateZ}deg`,
+                transform: `rotate(var(--rotate-deg))`,
+                position: 'relative',
+              } as any}
               onMouseEnter={e => {
-                e.currentTarget.style.transform = 'rotate(0deg) scale(1.06) translateY(-8px)';
+                const isMobile = window.innerWidth < 600;
+                e.currentTarget.style.transform = `${isMobile ? '' : 'rotate(0deg)'} scale(1.06) translateY(-8px)`;
                 e.currentTarget.style.zIndex = '50';
                 e.currentTarget.style.boxShadow = '0 24px 50px rgba(255,100,150,0.45), inset 0 2px 5px rgba(255,255,255,1)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.transform = `rotate(${t.rotateZ}deg)`;
+                const isMobile = window.innerWidth < 600;
+                e.currentTarget.style.transform = isMobile ? 'rotate(0deg)' : `rotate(var(--rotate-deg))`;
                 e.currentTarget.style.zIndex = '1';
                 e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.5)';
               }}
@@ -619,6 +622,9 @@ export default function AlbumPanel({ currentUser }: Props) {
         }
         @media (min-width: 600px) {
           .photo-polaroid { padding: 5px 5px 12px 5px; border-radius: 3px; margin-bottom: 20px; }
+        }
+        @media (max-width: 600px) {
+          .photo-polaroid { --rotate-deg: 0deg !important; }
         }
 
         /* Space Galaxy Background */
