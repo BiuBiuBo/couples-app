@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { formatDate, uploadImageString } from '@/lib/utils';
-import { unpairCouple } from '@/lib/db';
+import { unpairCouple, migratePartner } from '@/lib/db';
 import { linkEmailPassword, logout } from '@/lib/auth';
 import type { UserProfile } from '@/lib/types';
 import { useRouter } from 'next/navigation';
@@ -182,13 +182,18 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
   const [tab, setTab] = useState<'me' | 'partner'>('me');
   const [editing, setEditing] = useState(false);
   
-  // Unpair & Linking States
+  // Unpair & Linking & Migration States
   const [showUnpairConfirm, setShowUnpairConfirm] = useState(false);
   const [isUnpairing, setIsUnpairing] = useState(false);
   const [showLinkPass, setShowLinkPass] = useState(false);
   const [newPass, setNewPass] = useState('BeUyenXinhDep');
   const [isLinking, setIsLinking] = useState(false);
   const [linkError, setLinkError] = useState('');
+
+  const [showMigrate, setShowMigrate] = useState(false);
+  const [migrateCode, setMigrateCode] = useState('');
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrateError, setMigrateError] = useState('');
 
   const hasPassword = auth.currentUser?.providerData.some(p => p.providerId === 'password');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -312,6 +317,27 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
     }
   };
 
+  const handleMigrate = async () => {
+    if (!migrateCode || migrateCode.length < 3) {
+      setMigrateError('Vui lòng nhập mã mời hợp lệ.');
+      return;
+    }
+    setIsMigrating(true);
+    setMigrateError('');
+    try {
+      await migratePartner(currentUser, migrateCode.toUpperCase());
+      alert('✅ Đã chuyển tài khoản người yêu thành công! Giờ tài khoản mới đã có quyền truy cập không gian này.');
+      setShowMigrate(false);
+      setMigrateCode('');
+      // Force refresh data
+      window.location.reload();
+    } catch (err: any) {
+      setMigrateError(err.message || 'Lỗi khi chuyển đổi');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   const TabLabel = ({ user }: { user: UserProfile }) => (
     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <span style={{
@@ -381,6 +407,17 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
               </div>
             )}
 
+            {/* Migrate Partner button */}
+            <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>Chuyển tài khoản của người yêu</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Dùng khi người yêu đổi tài khoản nhưng muốn giữ ảnh/dữ liệu cũ</div>
+              </div>
+              <button className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }} onClick={() => setShowMigrate(true)}>
+                Thực hiện
+              </button>
+            </div>
+
             {/* Unpair button */}
             <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, borderColor: 'rgba(255, 77, 136, 0.2)' }}>
               <div>
@@ -424,6 +461,44 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
                 {isLinking ? 'Đang lưu...' : 'Xác nhận'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Migrate Partner Modal */}
+      {showMigrate && (
+        <div className="modal-overlay" onClick={() => !isMigrating && setShowMigrate(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 450 }}>
+            <h3 className="playfair" style={{ fontSize: 20, marginBottom: 12 }}>🔄 Chuyển tài khoản người yêu</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
+              Nhập **Mã kết đôi** của **Tài khoản mới** mà người yêu bạn vừa tạo. <br/>
+              Hành động này sẽ mời tài khoản mới đó vào "ngôi nhà" hiện tại và xóa quyền truy cập của tài khoản cũ.
+            </p>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label className="label">Mã mời của tài khoản mới</label>
+              <input 
+                autoFocus
+                type="text" 
+                className="input-field" 
+                placeholder="VD: ABCXYZ" 
+                value={migrateCode}
+                onChange={e => setMigrateCode(e.target.value.toUpperCase())}
+                style={{ textAlign: 'center', letterSpacing: 3, fontWeight: 'bold' }}
+              />
+              {migrateError && <div style={{ color: 'var(--rose-400)', fontSize: 13, marginTop: 8 }}>⚠️ {migrateError}</div>}
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowMigrate(false)} disabled={isMigrating}>Hủy</button>
+              <button className="btn-primary" style={{ flex: 1 }} onClick={handleMigrate} disabled={isMigrating}>
+                {isMigrating ? 'Đang thực hiện...' : 'Xác nhận chuyển'}
+              </button>
+            </div>
+            
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, textAlign: 'center' }}>
+              💡 Sau khi chuyển, bạn cần bảo người yêu đăng nhập vào tài khoản mới để thấy dữ liệu.
+            </p>
           </div>
         </div>
       )}

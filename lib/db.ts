@@ -39,6 +39,72 @@ export const unpairCouple = async (myUserId: string, partnerId: string): Promise
   }
 };
 
+// Migrate a partner to a new account
+export const migratePartner = async (myUser: UserProfile, newPartnerCode: string): Promise<void> => {
+  if (!myUser.coupleId || !myUser.partnerId) throw new Error('Bạn cần đang kết đôi để thực hiện việc này.');
+
+  // 1. Find the new user (the replacement)
+  const q = query(collection(db, 'users'), where('inviteCode', '==', newPartnerCode));
+  const snap = await getDocs(q);
+  
+  if (snap.empty) {
+    throw new Error('Mã mời của tài khoản mới không hợp lệ.');
+  }
+
+  const newUserDoc = snap.docs[0];
+  const newUser = newUserDoc.data() as UserProfile;
+
+  if (newUser.id === myUser.id) {
+    throw new Error('Bạn không thể tự kết đôi với chính mình.');
+  }
+
+  if (newUser.coupleId) {
+    throw new Error('Tài khoản mới này đã được kết đôi với ai đó rồi.');
+  }
+
+  // 2. Load the current couple document
+  const coupleRef = doc(db, 'couples', myUser.coupleId);
+  const coupleSnap = await getDoc(coupleRef);
+  if (!coupleSnap.exists()) throw new Error('Không tìm thấy dữ liệu cặp đôi hiện tại.');
+  const coupleData = coupleSnap.data() as CoupleData;
+
+  // 3. Identify which slot the old partner occupied (user1 or user2)
+  const isPartnerSlot1 = coupleData.user1Id === myUser.partnerId;
+  const oldPartnerId = myUser.partnerId;
+
+  // 4. Update the Couple document with the new partner's info
+  const updatedCoupleData: Partial<CoupleData> = {};
+  if (isPartnerSlot1) {
+    updatedCoupleData.user1Id = newUser.id;
+    updatedCoupleData.user1 = newUser;
+  } else {
+    updatedCoupleData.user2Id = newUser.id;
+    updatedCoupleData.user2 = newUser;
+  }
+  await updateDoc(coupleRef, updatedCoupleData);
+
+  // 5. Update my user document (point to new partner UID)
+  await updateDoc(doc(db, 'users', myUser.id), {
+    partnerId: newUser.id,
+  });
+
+  // 6. Update the NEW partner's user document
+  await updateDoc(doc(db, 'users', newUser.id), {
+    coupleId: myUser.coupleId,
+    partnerId: myUser.id,
+  });
+
+  // 7. Clear the OLD partner's user document (if reachable)
+  try {
+    await updateDoc(doc(db, 'users', oldPartnerId), {
+      coupleId: null,
+      partnerId: null,
+    });
+  } catch (e) {
+    console.warn('Không thể cập nhật tài khoản cũ (có lỗi hoặc không tồn tại), tiến hành bỏ qua.', e);
+  }
+};
+
 // Create a new Couple Pairing
 export const pairCouple = async (myUser: UserProfile, partnerCode: string): Promise<string> => {
   // 1. Find partner by their invite code
