@@ -61,6 +61,15 @@ export default function AlbumPanel({ currentUser }: Props) {
     setIsEditingName(false);
   };
 
+  useEffect(() => {
+    if (lightboxIndex !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [lightboxIndex]);
+
   const saveCaption = async (photoId: string, caption: string) => {
     if (!selectedAlbum || !currentUser.coupleId) return;
     const updatedAlbum = {
@@ -438,11 +447,11 @@ export default function AlbumPanel({ currentUser }: Props) {
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
               width: '100%', height: '100%', position: 'relative', gap: 12 
             }} 
-            onClick={e => e.stopPropagation()}
           >
 
-            {/* Photo Container with Animation */}
-            <div key={lightboxIndex} style={{ animation: 'fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '100%' }}>
+            <div key={lightboxIndex} 
+              onClick={e => e.stopPropagation()}
+              style={{ animation: 'fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '100%' }}>
               <img src={selectedAlbum.photos[lightboxIndex].url} alt=""
                 style={{
                   maxWidth: '100%', maxHeight: '85vh', borderRadius: 8,
