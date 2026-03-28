@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
+import { useToast } from '@/providers/ToastProvider';
 import { signInWithGoogle, logout, signInWithEmail, signUpWithEmail, isRestrictedBrowser } from '@/lib/auth';
 import { ensureUserDocument, pairCouple } from '@/lib/db';
 import styles from './page.module.css';
@@ -12,6 +13,7 @@ const HEARTS = ['💕', '💖', '💗', '💓', '💝', '💞', '❤️', '🌹'
 
 export default function LandingPage() {
   const router = useRouter();
+  const toast = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const { user, loading: authLoading } = useAuth();
@@ -109,7 +111,7 @@ export default function LandingPage() {
       } catch (err: any) {
         console.error("Lỗi redirect:", err);
         if (err.code !== 'auth/popup-closed-by-user') {
-          alert('🍎 Lỗi iOS/Safari: ' + (err.message || 'Vui lòng thử lại bằng trình duyệt Safari gốc!'));
+          toast.error('🍎 Lỗi iOS/Safari: ' + (err.message || 'Vui lòng thử lại bằng trình duyệt Safari gốc!'));
         }
       }
     };
@@ -133,9 +135,9 @@ export default function LandingPage() {
 
     if (isInApp) {
       if (isIOS) {
-        alert('🍎 CẢNH BÁO BẢO MẬT: Google không cho phép đăng nhập bên trong ứng dụng này.\n\nBạn hãy bấm vào biểu tượng "Ba chấm (...)" hoặc "La bàn" ở góc màn hình và chọn "MỞ BẰNG TRÌNH DUYỆT" (Safari) để tiếp tục nhé!');
+        toast.warning('🍎 CẢNH BÁO: Google không cho phép đăng nhập bên trong ứng dụng này. Hãy chọn "Mở bằng Safari" nhé!');
       } else {
-        alert('🌐 CẢNH BÁO BẢO MẬT: Trình duyệt này không được Google hỗ trợ.\n\nBạn hãy bấm vào nút ba chấm ở góc màn hình và chọn "Mở bằng trình duyệt" (Chrome/Edge) để đăng nhập nhé!');
+        toast.warning('🌐 CẢNH BÁO: Trình duyệt này không được Google hỗ trợ. Hãy chọn "Mở bằng trình duyệt" bên ngoài nhé!');
       }
       return;
     }
@@ -156,6 +158,7 @@ export default function LandingPage() {
             console.error('Không thể tự động liên kết mật khẩu:', err);
           }
         }
+        toast.success(`Chào mừng quay trở lại! 💖`);
       }
     } catch (e: any) {
       console.error(e);
@@ -191,6 +194,7 @@ export default function LandingPage() {
       
       if (fbUser) {
         await ensureUserDocument(fbUser);
+        toast.success(emailMode === 'signup' ? 'Đăng ký thành công! Chào mừng hai bạn ✨' : 'Đăng nhập thành công! 🤗');
       }
     } catch (e: any) {
       console.error(e);
@@ -213,9 +217,9 @@ export default function LandingPage() {
     setPairingError('');
     try {
       await pairCouple(profile, partnerCode.trim().toUpperCase());
-      // Successful pair -> profile.coupleId is updated in Firestore -> onSnapshot updates profile -> useEffect triggers router.push
+      toast.success('Gắn kết thành công! Chúc mừng hai bạn đã về chung một nhà 🏠💕');
     } catch (e: any) {
-      setPairingError(e.message);
+      toast.error(`Lỗi ghép đôi: ${e.message}`);
     } finally {
       setIsLoading(false);
     }

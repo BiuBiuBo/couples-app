@@ -6,6 +6,7 @@ import { notify } from '@/lib/notify';
 import { generateId } from '@/lib/utils';
 import type { BucketItem, UserProfile } from '@/lib/types';
 import Avatar from '@/components/Avatar';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; }
 
@@ -22,6 +23,7 @@ type FilterType = 'all' | 'done' | 'todo';
 
 export default function BucketListPanel({ currentUser, partner }: Props) {
   const items = useBucketList(currentUser.coupleId);
+  const toast = useToast();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<BucketItem['category']>('other');
   const [filter, setFilter] = useState<FilterType>('all');
@@ -38,6 +40,7 @@ export default function BucketListPanel({ currentUser, partner }: Props) {
     await mutators.addDoc(currentUser.coupleId, 'bucketList', item);
     notify(currentUser.coupleId, currentUser, 'bucket_add', `${currentUser.name} vừa thêm: “${newText.trim()}” vào danh sách 100 điều muốn làm`, 'bucket-list');
     setNewText(''); setShowAdd(false);
+    toast.success('Đã thêm điều ước mới vào danh sách! ✨');
   };
 
   const toggleComplete = async (item: BucketItem) => {
@@ -46,6 +49,7 @@ export default function BucketListPanel({ currentUser, partner }: Props) {
     await mutators.updateDoc(currentUser.coupleId, 'bucketList', item.id, updated);
     if (!item.completedAt) {
       notify(currentUser.coupleId, currentUser, 'bucket_complete', `${currentUser.name} vừa hoàn thành: “${item.text}” 🎉`, 'bucket-list');
+      toast.success('Chúc mừng hai bạn đã hoàn thành thêm một mục tiêu! 🥳');
     }
   };
 

@@ -5,6 +5,7 @@ import { useAnniversaries, mutators } from '@/lib/hooks';
 import { notify } from '@/lib/notify';
 import { formatDate, generateId } from '@/lib/utils';
 import type { Anniversary, CoupleData, UserProfile } from '@/lib/types';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props { couple: CoupleData | null; currentUser: UserProfile; onRefresh?: () => void; }
 
@@ -28,6 +29,7 @@ function daysUntil(dateStr: string, recurring: boolean): number {
 
 export default function AnniversaryPanel({ couple, currentUser, onRefresh }: Props) {
   const items = useAnniversaries(couple?.id);
+  const toast = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', date: '', isRecurring: true, emoji: '💕', color: '#ff4d88' });
 
@@ -45,6 +47,7 @@ export default function AnniversaryPanel({ couple, currentUser, onRefresh }: Pro
     
     setForm({ title: '', date: '', isRecurring: true, emoji: '💕', color: '#ff4d88' });
     setShowAdd(false);
+    toast.success('Đã lưu ngày kỷ niệm mới! Đừng quên chúc mừng nhau nhé 💖');
   };
 
   const deleteItem = async (id: string) => {

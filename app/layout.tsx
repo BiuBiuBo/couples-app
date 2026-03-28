@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ToastProvider } from '@/providers/ToastProvider';
 
 export const metadata: Metadata = {
   title: "Chúng Mình — Không gian riêng của hai người",
@@ -22,7 +23,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </body>
     </html>
   );
 }

@@ -8,6 +8,7 @@ import { unpairCouple, migratePartner } from '@/lib/db';
 import { linkEmailPassword, logout } from '@/lib/auth';
 import type { UserProfile } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props {
   currentUser: UserProfile;
@@ -179,6 +180,7 @@ function ProfileCard({ user, isMe, onEdit }: { user: UserProfile; isMe: boolean;
 
 export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [tab, setTab] = useState<'me' | 'partner'>('me');
   const [editing, setEditing] = useState(false);
   
@@ -277,7 +279,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
       setEditing(false);
     } catch (error: any) {
       console.error(error);
-      alert("❌ Lưu thất bại: " + (error.message || "Không rõ nguyên nhân. Hãy kiểm tra lại kết nối mạng hoặc kho lưu trữ Firebase."));
+      toast.error("❌ Lưu thất bại: " + (error.message || "Không rõ nguyên nhân."));
     } finally {
       setIsSaving(false);
     }
@@ -291,7 +293,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
       router.push('/');
       window.location.reload(); // Force refresh to clear state
     } catch (err: any) {
-      alert("Lỗi khi hủy ghép đôi: " + err.message);
+      toast.error("Lỗi khi hủy ghép đôi: " + err.message);
     } finally {
       setIsUnpairing(false);
       setShowUnpairConfirm(false);
@@ -307,7 +309,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
     setLinkError('');
     try {
       await linkEmailPassword(newPass);
-      alert("✅ Đã thiết lập mật khẩu thành công! Giờ bạn có thể đăng nhập bằng email và mật khẩu này.");
+      toast.success("✅ Đã thiết lập mật khẩu thành công! Giờ bạn có thể dùng email/mật khẩu này để đăng nhập lần sau.");
       setShowLinkPass(false);
       setNewPass('');
     } catch (err: any) {
@@ -326,7 +328,7 @@ export default function ProfilePanel({ currentUser, partner, onUpdate }: Props) 
     setMigrateError('');
     try {
       await migratePartner(currentUser, migrateCode.toUpperCase());
-      alert('✅ Đã chuyển tài khoản người yêu thành công! Giờ tài khoản mới đã có quyền truy cập không gian này.');
+      toast.success('✅ Đã chuyển tài khoản người yêu thành công! Giờ tài khoản mới đã có quyền truy cập không gian này.');
       setShowMigrate(false);
       setMigrateCode('');
       // Force refresh data

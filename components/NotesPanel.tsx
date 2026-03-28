@@ -6,6 +6,7 @@ import { notify } from '@/lib/notify';
 import { formatDate, generateId } from '@/lib/utils';
 import type { Note, UserProfile } from '@/lib/types';
 import Avatar from '@/components/Avatar';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; }
 
@@ -13,6 +14,7 @@ const MOODS = ['❤️', '🥰', '😊', '🤭', '🥺', '😔', '🌙', '✨', 
 
 export default function NotesPanel({ currentUser, partner }: Props) {
   const notes = useNotes(currentUser.coupleId);
+  const toast = useToast();
   const [tab, setTab] = useState<'received' | 'sent'>('received');
   const [showAdd, setShowAdd] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -24,10 +26,10 @@ export default function NotesPanel({ currentUser, partner }: Props) {
   const displayed = tab === 'sent' ? myNotes : partnerNotes;
 
   const addNote = async () => {
-    if (!form.title.trim()) return alert('Bạn ơi, hãy nhập tiêu đề cho bản ghi chú nhé!');
-    if (!form.content.trim()) return alert('Nội dung ghi chú không được để trống nè!');
-    if (form.isTimeCapsule && !form.openDate) return alert('Bạn hãy chọn ngày mở Time Capsule nhé!');
-    if (!currentUser.coupleId) return alert('Dường như bạn chưa kết đôi, hãy thử tải lại trang!');
+    if (!form.title.trim()) return toast.warning('Bạn ơi, hãy nhập tiêu đề cho bản ghi chú nhé!');
+    if (!form.content.trim()) return toast.warning('Nội dung ghi chú không được để trống nè!');
+    if (form.isTimeCapsule && !form.openDate) return toast.warning('Bạn hãy chọn ngày mở Time Capsule nhé!');
+    if (!currentUser.coupleId) return toast.error('Dường như bạn chưa kết đôi, hãy thử tải lại trang!');
 
     setIsSending(true);
     try {
@@ -46,9 +48,10 @@ export default function NotesPanel({ currentUser, partner }: Props) {
       notify(currentUser.coupleId, currentUser, 'note_add', `${currentUser.name} vừa gửi một ghi chú mới: “${note.mood} ${form.title.trim()}”`, 'notes');
       setForm({ title: '', content: '', mood: '❤️', isTimeCapsule: false, openDate: '' });
       setShowAdd(false);
+      toast.success('Đã gửi ghi chú thành công! 💌');
     } catch (e: any) {
       console.error(e);
-      alert(`Lỗi khi gửi ghi chú: ${e.message}`);
+      toast.error(`Lỗi gửi ghi chú: ${e.message}`);
     } finally {
       setIsSending(false);
     }

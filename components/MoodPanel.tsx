@@ -5,6 +5,7 @@ import { useMoods, mutators } from '@/lib/hooks';
 import { notify } from '@/lib/notify';
 import Avatar from '@/components/Avatar';
 import type { MoodEntry, UserProfile } from '@/lib/types';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; onNotify?: () => void; }
 
@@ -22,6 +23,7 @@ type MoodId = typeof MOODS[number]['id'];
 export default function MoodPanel({ currentUser, partner, onNotify }: Props) {
   const today = new Date().toISOString().slice(0, 10);
   const allMoods = useMoods(currentUser.coupleId);
+  const toast = useToast();
   const [selectedMood, setSelectedMood] = useState<MoodId | null>(null);
   const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
@@ -47,6 +49,7 @@ export default function MoodPanel({ currentUser, partner, onNotify }: Props) {
     
     setSaved(true);
     setNote('');
+    toast.success('Hôm nay bạn cảm thấy thế nào? Đã lưu nhé! ✨');
   };
 
   const getMoodDef = (id: string) => MOODS.find(m => m.id === id);

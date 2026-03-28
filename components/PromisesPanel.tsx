@@ -6,11 +6,13 @@ import { notify } from '@/lib/notify';
 import Avatar from '@/components/Avatar';
 import { formatDate, generateId } from '@/lib/utils';
 import type { Promise, UserProfile } from '@/lib/types';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props { currentUser: UserProfile; partner: UserProfile | null; }
 
 export default function PromisesPanel({ currentUser, partner }: Props) {
   const promises = usePromises(currentUser.coupleId);
+  const toast = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [newText, setNewText] = useState('');
 
@@ -24,6 +26,7 @@ export default function PromisesPanel({ currentUser, partner }: Props) {
     await mutators.addDoc(currentUser.coupleId, 'promises', p);
     notify(currentUser.coupleId, currentUser, 'promise_add', `${currentUser.name} vừa thêm lời hứa mới: “${newText.trim()}”`, 'promises');
     setNewText(''); setShowAdd(false);
+    toast.success('Đã lưu lời hứa của bạn! Hãy trân trọng nó nhé 🤝');
   };
 
   const toggleFulfill = async (p: Promise) => {
@@ -32,6 +35,7 @@ export default function PromisesPanel({ currentUser, partner }: Props) {
     await mutators.updateDoc(currentUser.coupleId, 'promises', p.id, { isFulfilled: willFulfill, fulfilledAt: willFulfill ? new Date().toISOString() : undefined });
     if (willFulfill) {
       notify(currentUser.coupleId, currentUser, 'promise_fulfill', `${currentUser.name} đã giữ lời hứa: “${p.text}” ✅`, 'promises');
+      toast.success('Thật tuyệt vời khi hai bạn luôn giữ lời hứa với nhau! 😊');
     }
   };
 

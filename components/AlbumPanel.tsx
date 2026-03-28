@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAlbums, mutators } from '@/lib/hooks';
 import { notify } from '@/lib/notify';
+import { useToast } from '@/providers/ToastProvider';
 import { generateId, uploadImageString } from '@/lib/utils';
 import type { Album, Photo, UserProfile } from '@/lib/types';
 
@@ -10,6 +11,7 @@ interface Props { currentUser: UserProfile; }
 
 export default function AlbumPanel({ currentUser }: Props) {
   const albums = useAlbums(currentUser.coupleId);
+  const toast = useToast();
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
   const selectedAlbum = useMemo(() => albums.find(a => a.id === selectedAlbumId) || null, [albums, selectedAlbumId]);
 
@@ -146,9 +148,10 @@ export default function AlbumPanel({ currentUser }: Props) {
       notify(currentUser.coupleId, currentUser, 'photo_add', `${currentUser.name} vừa thêm ảnh mới vào album “${selectedAlbum.name}”`, 'albums');
       setUploadQueue(rest);
       setUploadCaption('');
+      toast.success('Đã tải ảnh lên thành công! 📸');
     } catch (e: any) {
       console.error(e);
-      alert(`Lỗi khi tải ảnh: ${e.message}. Vui lòng kiểm tra lại Cloudinary Preset!`);
+      toast.error(`Lỗi khi tải ảnh: ${e.message}`);
     } finally {
       setIsUploading(false);
     }
