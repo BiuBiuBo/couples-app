@@ -25,8 +25,9 @@ export default function LandingPage() {
   // Email Auth State
   const [emailForm, setEmailForm] = useState({ email: '', password: '', name: '' });
   const [authMethod, setAuthMethod] = useState<'google' | 'email'>('google');
-  const [emailMode, setEmailMode] = useState<'signin' | 'signup'>('signin');
+  const [emailMode, setEmailMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [authError, setAuthError] = useState('');
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   // Auto redirect to dashboard if paired
   useEffect(() => {
@@ -173,8 +174,14 @@ export default function LandingPage() {
       let fbUser;
       if (emailMode === 'signin') {
         fbUser = await signInWithEmail(emailForm.email, emailForm.password);
-      } else {
+      } else if (emailMode === 'signup') {
         fbUser = await signUpWithEmail(emailForm.email, emailForm.password, emailForm.name);
+      } else if (emailMode === 'forgot') {
+        const { resetEmailPassword } = await import('@/lib/auth');
+        await resetEmailPassword(emailForm.email);
+        setResetEmailSent(true);
+        setIsLoading(false);
+        return;
       }
       
       if (fbUser) {
@@ -335,9 +342,11 @@ export default function LandingPage() {
                         />
                       </div>
                     )}
+                    
                     <div style={{ marginBottom: 12 }}>
                       <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>EMAIL</label>
                       <input 
+                        autoFocus={emailMode !== 'signup'}
                         className="input-field"
                         type="email"
                         placeholder="example@gmail.com"
@@ -346,40 +355,76 @@ export default function LandingPage() {
                         required
                       />
                     </div>
-                    <div style={{ marginBottom: 16 }}>
-                      <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>MẬT KHẨU</label>
-                      <input 
-                        className="input-field"
-                        type="password"
-                        placeholder="••••••••"
-                        value={emailForm.password}
-                        onChange={e => setEmailForm({ ...emailForm, password: e.target.value })}
-                        required
-                        minLength={6}
-                      />
-                    </div>
+
+                    {emailMode !== 'forgot' && (
+                      <div style={{ marginBottom: 16 }}>
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>MẬT KHẨU</label>
+                        <input 
+                          className="input-field"
+                          type="password"
+                          placeholder="••••••••"
+                          value={emailForm.password}
+                          onChange={e => setEmailForm({ ...emailForm, password: e.target.value })}
+                          required
+                          minLength={6}
+                        />
+                        {emailMode === 'signin' && (
+                          <div style={{ textAlign: 'right', marginTop: 8 }}>
+                            <button 
+                              type="button"
+                              onClick={() => { setEmailMode('forgot'); setAuthError(''); setResetEmailSent(false); }}
+                              style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>
+                              Quên mật khẩu?
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {authError && <div style={{ color: 'var(--rose-400)', fontSize: 13, marginBottom: 16 }}>⚠️ {authError}</div>}
-
-                    <button className="btn-primary" style={{ width: '100%', padding: '14px' }} disabled={isLoading}>
-                      {isLoading ? 'Đang xử lý...' : (emailMode === 'signin' ? 'Đăng nhập' : 'Đăng ký ngay')}
-                    </button>
+                    
+                    {resetEmailSent ? (
+                      <div style={{ textAlign: 'center', background: 'rgba(255, 77, 136, 0.1)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: 16 }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>📧</div>
+                        <p style={{ fontSize: 13, color: 'var(--rose-300)', fontWeight: 600 }}>
+                          Đã gửi hướng dẫn khôi phục! <br/> Bạn kiểm tra hộp thư đến nhé.
+                        </p>
+                      </div>
+                    ) : (
+                      <button className="btn-primary" style={{ width: '100%', padding: '14px' }} disabled={isLoading}>
+                        {isLoading ? 'Đang xử lý...' : (
+                          emailMode === 'signin' ? 'Đăng nhập' : 
+                          emailMode === 'signup' ? 'Đăng ký ngay' : 'Gửi link khôi phục'
+                        )}
+                      </button>
+                    )}
 
                     <div style={{ marginTop: 20, textAlign: 'center', fontSize: 13 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>
-                        {emailMode === 'signin' ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
-                      </span>
-                      <button 
-                        type="button"
-                        onClick={() => { setEmailMode(emailMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); }}
-                        style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-                        {emailMode === 'signin' ? 'Đăng ký' : 'Đăng nhập'}
-                      </button>
+                      {emailMode === 'forgot' ? (
+                        <button 
+                          type="button"
+                          onClick={() => { setEmailMode('signin'); setAuthError(''); }}
+                          style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                          Quay lại đăng nhập
+                        </button>
+                      ) : (
+                        <>
+                          <span style={{ color: 'var(--text-muted)' }}>
+                            {emailMode === 'signin' ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
+                          </span>
+                          <button 
+                            type="button"
+                            onClick={() => { setEmailMode(emailMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); }}
+                            style={{ color: 'var(--pink-400)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                            {emailMode === 'signin' ? 'Đăng ký' : 'Đăng nhập'}
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     <button 
                       type="button"
-                      onClick={() => { setAuthMethod('google'); setAuthError(''); }}
+                      onClick={() => { setAuthMethod('google'); setAuthError(''); setEmailMode('signin'); }}
                       className="btn-ghost" style={{ marginTop: 12, width: '100%', fontSize: 14 }}>
                       ← Quay lại đăng nhập Google
                     </button>

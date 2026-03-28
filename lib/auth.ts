@@ -3,7 +3,7 @@ import {
   GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, 
   signOut, setPersistence, indexedDBLocalPersistence,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
-  EmailAuthProvider, linkWithCredential
+  EmailAuthProvider, linkWithCredential, sendPasswordResetEmail
 } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
@@ -86,6 +86,15 @@ export const linkEmailPassword = async (pass: string) => {
     return user;
   } catch (error) {
     console.error("Lỗi liên kết Email/Password:", error);
+    throw error;
+  }
+};
+
+export const resetEmailPassword = async (email: string) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    console.error("Lỗi gửi email khôi phục:", error);
     throw error;
   }
 };
