@@ -347,6 +347,7 @@ export default function AlbumPanel({ currentUser }: Props) {
                 animation: `floatGentle ${t.animDuration}s ease-in-out infinite alternate`,
                 animationDelay: `${t.animDelay}s`,
                 transform: `rotate(${t.rotateZ}deg)`,
+                position: 'relative', // Ensure top works
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'rotate(0deg) scale(1.06) translateY(-8px)';
@@ -580,22 +581,19 @@ export default function AlbumPanel({ currentUser }: Props) {
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes floatGentle {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-8px); }
+          from { top: 0px; }
+          to   { top: -10px; }
         }
 
         /* Masonry polaroid grid */
         .album-masonry-grid {
-          columns: 1; /* Default to 1 for smallest screens */
-          column-gap: 12px;
-          padding: 12px 12px 40px;
+          columns: 2; /* Back to 2 columns for mobile as requested */
+          column-gap: 8px;
+          padding: 12px 10px 40px;
           max-width: 100%;
           margin: 0 auto;
         }
-        @media (min-width: 440px) {
-          .album-masonry-grid { columns: 2; column-gap: 12px; }
-        }
-        @media (min-width: 768px) {
+        @media (min-width: 600px) {
           .album-masonry-grid { columns: 3; column-gap: 16px; padding: 24px 24px 50px; }
         }
         @media (min-width: 1024px) {
