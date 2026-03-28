@@ -341,47 +341,54 @@ export default function AlbumPanel({ currentUser }: Props) {
           {selectedAlbum.photos.map((photo, i) => {
             const t = transforms3D[i] || { rotateZ: 0, animDelay: 0, animDuration: 4 };
             return (
-            <div key={photo.id}
-              className="photo-polaroid"
-              style={{ 
-                animation: `floatGentle ${t.animDuration}s ease-in-out infinite alternate`,
-                animationDelay: `${t.animDelay}s`,
-                '--rotate-deg': `${t.rotateZ}deg`,
-                transform: `rotate(var(--rotate-deg))`,
-                position: 'relative',
-              } as any}
-              onMouseEnter={e => {
-                const isMobile = window.innerWidth < 600;
-                e.currentTarget.style.transform = `${isMobile ? '' : 'rotate(0deg)'} scale(1.06) translateY(-8px)`;
-                e.currentTarget.style.zIndex = '50';
-                e.currentTarget.style.boxShadow = '0 24px 50px rgba(255,100,150,0.45), inset 0 2px 5px rgba(255,255,255,1)';
-              }}
-              onMouseLeave={e => {
-                const isMobile = window.innerWidth < 600;
-                e.currentTarget.style.transform = isMobile ? 'rotate(0deg)' : `rotate(var(--rotate-deg))`;
-                e.currentTarget.style.zIndex = '1';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.5)';
-              }}
-              onClick={() => setLightboxIndex(i)}
-            >
-              <div style={{ overflow: 'hidden', borderRadius: 2, width: '100%', background: '#111' }}>
-                <img src={photo.url} alt="" style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }}
-                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                />
-              </div>
-              {/* Caption below photo */}
-              <div style={{ textAlign: 'center', paddingTop: 6, paddingBottom: 2 }}>
-                {photo.caption ? (
-                  <p style={{
-                    fontSize: 10, color: '#555', fontStyle: 'italic',
-                    margin: 0, lineHeight: 1.2,
-                    overflow: 'hidden', display: '-webkit-box',
-                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
-                  }}>{photo.caption}</p>
-                ) : (
-                  <span style={{ fontSize: 11, color: '#bbb', letterSpacing: 0.3 }}>💬 thêm ghi chú...</span>
-                )}
+            <div key={photo.id} className="photo-polaroid">
+              <div 
+                className="photo-float-wrapper"
+                style={{ 
+                  animation: `floatGentle ${t.animDuration}s ease-in-out infinite alternate`,
+                  animationDelay: `${t.animDelay}s`,
+                }}
+              >
+                <div 
+                  className="photo-card-inner"
+                  style={{ 
+                    '--rotate-deg': `${t.rotateZ}deg`,
+                    transform: `rotate(var(--rotate-deg))`,
+                  } as any}
+                  onMouseEnter={e => {
+                    const isMobile = window.innerWidth < 600;
+                    e.currentTarget.style.transform = `${isMobile ? '' : 'rotate(0deg)'} scale(1.06) translateY(-8px)`;
+                    e.currentTarget.style.zIndex = '50';
+                    e.currentTarget.style.boxShadow = '0 24px 50px rgba(255,100,150,0.45), inset 0 2px 5px rgba(255,255,255,1)';
+                  }}
+                  onMouseLeave={e => {
+                    const isMobile = window.innerWidth < 600;
+                    e.currentTarget.style.transform = isMobile ? 'rotate(0deg)' : `rotate(var(--rotate-deg))`;
+                    e.currentTarget.style.zIndex = '1';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.5)';
+                  }}
+                  onClick={() => setLightboxIndex(i)}
+                >
+                  <div style={{ overflow: 'hidden', borderRadius: 2, width: '100%', background: '#111', minHeight: '120px' }}>
+                    <img src={photo.url} alt="" style={{ width: '100%', height: 'auto', display: 'block', transition: 'transform 0.4s ease' }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    />
+                  </div>
+                  {/* Caption below photo */}
+                  <div style={{ textAlign: 'center', paddingTop: 6, paddingBottom: 2 }}>
+                    {photo.caption ? (
+                      <p style={{
+                        fontSize: 10, color: '#555', fontStyle: 'italic',
+                        margin: 0, lineHeight: 1.2,
+                        overflow: 'hidden', display: '-webkit-box',
+                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                      }}>{photo.caption}</p>
+                    ) : (
+                      <span style={{ fontSize: 11, color: '#bbb', letterSpacing: 0.3 }}>💬 thêm ghi chú...</span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )})}
@@ -584,8 +591,8 @@ export default function AlbumPanel({ currentUser }: Props) {
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes floatGentle {
-          from { top: 0px; }
-          to   { top: -10px; }
+          from { transform: translateY(0px); }
+          to   { transform: translateY(-10px); }
         }
 
         /* Masonry polaroid grid */
@@ -607,11 +614,20 @@ export default function AlbumPanel({ currentUser }: Props) {
         /* Polaroid card */
         .photo-polaroid {
           break-inside: avoid;
-          display: block;
+          display: inline-block; /* More stable than block in some browsers */
           width: 100%;
           margin-bottom: 8px;
+        }
+        .photo-float-wrapper {
+          width: 100%;
+          height: auto;
+          will-change: transform;
+        }
+        .photo-card-inner {
+          display: block;
+          width: 100%;
           cursor: pointer;
-          padding: 6px 6px 14px 6px; /* Thick polaroid border makes the image itself smaller */
+          padding: 6px 6px 14px 6px;
           background: #fff;
           box-shadow: 0 4px 10px rgba(0,0,0,0.3);
           border-radius: 2px;
@@ -619,10 +635,10 @@ export default function AlbumPanel({ currentUser }: Props) {
                       box-shadow 0.35s ease;
           position: relative;
           z-index: 1;
-          will-change: transform;
         }
         @media (min-width: 600px) {
-          .photo-polaroid { padding: 5px 5px 12px 5px; border-radius: 3px; margin-bottom: 20px; }
+          .photo-card-inner { padding: 5px 5px 12px 5px; border-radius: 3px; }
+          .photo-polaroid { margin-bottom: 20px; }
         }
         @media (max-width: 600px) {
           .photo-polaroid { --rotate-deg: 0deg !important; }
