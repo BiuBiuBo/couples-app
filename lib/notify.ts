@@ -21,7 +21,7 @@ export async function notify(
     message,
     createdAt: new Date().toISOString(),
     isRead: false,
-    targetView,
+    ...(targetView ? { targetView } : {}),
   };
 
   await mutators.addDoc(coupleId, 'notifications', notif);
