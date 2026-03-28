@@ -8,17 +8,19 @@ import {
 
 const provider = new GoogleAuthProvider();
 
+export const isRestrictedBrowser = () => {
+  if (typeof window === "undefined") return false;
+  return /FBAN|FBAV|Zalo|Instagram/i.test(navigator.userAgent);
+};
+
 export const signInWithGoogle = async () => {
   try {
-    const isMessenger = /FBAN|FBAV|Zalo|Instagram/i.test(navigator.userAgent);
-    
-    // Always attempt with Persistence first
-    await setPersistence(auth, indexedDBLocalPersistence);
+    const restricted = isRestrictedBrowser();
 
     // If it's a known restricted In-App browser, we still need Redirect 
     // but the user is advised to use Safari.
     // However, on real Safari, Popup works better for some projects.
-    if (isMessenger) {
+    if (restricted) {
       await signInWithRedirect(auth, provider);
       return null;
     }

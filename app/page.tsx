@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
-import { signInWithGoogle, logout, signInWithEmail, signUpWithEmail } from '@/lib/auth';
+import { signInWithGoogle, logout, signInWithEmail, signUpWithEmail, isRestrictedBrowser } from '@/lib/auth';
 import { ensureUserDocument, pairCouple } from '@/lib/db';
 import styles from './page.module.css';
 
@@ -28,6 +28,11 @@ export default function LandingPage() {
   const [emailMode, setEmailMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [authError, setAuthError] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [isRestricted, setIsRestricted] = useState(false);
+
+  useEffect(() => {
+    setIsRestricted(isRestrictedBrowser());
+  }, []);
 
   // Auto redirect to dashboard if paired
   useEffect(() => {
@@ -303,6 +308,30 @@ export default function LandingPage() {
                     ? 'Đăng nhập bằng Google để bảo mật kỷ niệm của hai bạn trên đám mây.'
                     : emailMode === 'signin' ? 'Đăng nhập vào tài khoản của bạn' : 'Tạo tài khoản mới cho hai bạn'}
                 </p>
+
+                {/* Restricted Browser Warning */}
+                {isRestricted && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 77, 136, 0.1) 100%)',
+                    border: '1px solid rgba(255, 77, 136, 0.2)',
+                    borderRadius: '16px',
+                    padding: '14px 18px',
+                    marginBottom: '24px',
+                    fontSize: '13.5px',
+                    lineHeight: '1.5',
+                    color: 'var(--rose-400)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    textAlign: 'left',
+                    gap: '12px',
+                    boxShadow: '0 8px 32px rgba(255, 77, 136, 0.1)'
+                  }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+                    <span>
+                      Bạn đang mở từ <b>Zalo/Facebook</b>. Hãy nhấn vào dấu <span style={{ fontWeight: 800 }}>...</span> chọn <b>"Mở bằng Safari"</b> để không bị tự động đăng xuất nhé!
+                    </span>
+                  </div>
+                )}
 
                 {authMethod === 'google' ? (
                   <>
