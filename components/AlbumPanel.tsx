@@ -23,6 +23,7 @@ export default function AlbumPanel({ currentUser }: Props) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState('');
   const [editingCaption, setEditingCaption] = useState<{ photoId: string; value: string } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   // Pending upload queue: show caption modal before saving
   const [uploadQueue, setUploadQueue] = useState<{ url: string }[]>([]);
   const [uploadCaption, setUploadCaption] = useState('');
@@ -186,11 +187,17 @@ export default function AlbumPanel({ currentUser }: Props) {
 
   const deleteAlbum = async (id: string) => {
     if (!currentUser.coupleId) return;
-    const album = albums.find(a => a.id === id);
-    await mutators.deleteDoc(currentUser.coupleId, 'albums', id);
-    if (album) notify(currentUser.coupleId, currentUser, 'album_delete', `${currentUser.name} đã xóa album “${album.coverEmoji} ${album.name}”`);
-    setSelectedAlbumId(null);
-    toast.info('Đã xóa album kỷ niệm.');
+    try {
+      const album = albums.find(a => a.id === id);
+      await mutators.deleteDoc(currentUser.coupleId, 'albums', id);
+      if (album) notify(currentUser.coupleId, currentUser, 'album_delete', `${currentUser.name} đã xóa album “${album.coverEmoji} ${album.name}”`, 'albums');
+      setSelectedAlbumId(null);
+      setShowDeleteConfirm(false);
+      toast.info('Đã xóa album kỷ niệm.');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(`Không thể xóa album: ${err.message}`);
+    }
   };
 
   const deletePhoto = async (photoId: string) => {
@@ -361,7 +368,7 @@ export default function AlbumPanel({ currentUser }: Props) {
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 12 }}>
           <button className="btn-primary" onClick={() => fileRef.current?.click()}>+ Thêm ảnh</button>
-          <button className="btn-secondary" onClick={() => { if (confirm('Xóa album này và tất cả ảnh bên trong?')) deleteAlbum(selectedAlbum.id); }}
+          <button className="btn-secondary" onClick={() => setShowDeleteConfirm(true)}
             style={{ color: 'var(--rose-400)', borderColor: 'rgba(244,63,94,0.3)' }}>🗑 Xóa</button>
         </div>
       </div>
@@ -621,6 +628,27 @@ export default function AlbumPanel({ currentUser }: Props) {
                 disabled={isUploading}
                 title="Huỷ tất cả">
                 ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ── */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)} style={{ zIndex: 1100 }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', padding: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>🗑️</div>
+            <h3 className="playfair" style={{ fontSize: 24, marginBottom: 12 }}>Xóa Album?</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+              Bạn có chắc chắn muốn xóa album <strong>“{selectedAlbum?.name}”</strong>? 
+              Hành động này sẽ xóa vĩnh viễn tất cả ảnh bên trong và không thể hoàn tác.
+            </p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)} style={{ flex: 1 }}>Huỷ</button>
+              <button className="btn-primary" onClick={() => deleteAlbum(selectedAlbum!.id)} 
+                style={{ flex: 1, background: 'var(--rose-600)', boxShadow: '0 4px 15px rgba(225, 29, 72, 0.4)' }}>
+                Xóa Vĩnh Viễn
               </button>
             </div>
           </div>
