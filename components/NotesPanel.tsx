@@ -17,28 +17,41 @@ export default function NotesPanel({ currentUser, partner }: Props) {
   const [showAdd, setShowAdd] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [form, setForm] = useState({ title: '', content: '', mood: '❤️', isTimeCapsule: false, openDate: '' });
+  const [isSending, setIsSending] = useState(false);
 
   const myNotes = notes.filter(n => n.fromUserId === currentUser.id);
   const partnerNotes = notes.filter(n => n.fromUserId !== currentUser.id);
   const displayed = tab === 'sent' ? myNotes : partnerNotes;
 
   const addNote = async () => {
-    if (!form.title.trim() || !form.content.trim() || !currentUser.coupleId) return;
-    const note: Note = {
-      id: generateId(),
-      fromUserId: currentUser.id,
-      title: form.title.trim(),
-      content: form.content.trim(),
-      mood: form.mood,
-      isTimeCapsule: form.isTimeCapsule,
-      openDate: form.isTimeCapsule ? form.openDate : undefined,
-      createdAt: new Date().toISOString(),
-      isRead: false,
-    };
-    await mutators.addDoc(currentUser.coupleId, 'notes', note);
-    notify(currentUser.coupleId, currentUser, 'note_add', `${currentUser.name} vừa gửi một ghi chú mới: “${note.mood} ${form.title.trim()}”`, 'notes');
-    setForm({ title: '', content: '', mood: '❤️', isTimeCapsule: false, openDate: '' });
-    setShowAdd(false);
+    if (!form.title.trim()) return alert('Bạn ơi, hãy nhập tiêu đề cho bản ghi chú nhé!');
+    if (!form.content.trim()) return alert('Nội dung ghi chú không được để trống nè!');
+    if (form.isTimeCapsule && !form.openDate) return alert('Bạn hãy chọn ngày mở Time Capsule nhé!');
+    if (!currentUser.coupleId) return alert('Dường như bạn chưa kết đôi, hãy thử tải lại trang!');
+
+    setIsSending(true);
+    try {
+      const note: Note = {
+        id: generateId(),
+        fromUserId: currentUser.id,
+        title: form.title.trim(),
+        content: form.content.trim(),
+        mood: form.mood,
+        isTimeCapsule: form.isTimeCapsule,
+        openDate: form.isTimeCapsule ? form.openDate : undefined,
+        createdAt: new Date().toISOString(),
+        isRead: false,
+      };
+      await mutators.addDoc(currentUser.coupleId, 'notes', note);
+      notify(currentUser.coupleId, currentUser, 'note_add', `${currentUser.name} vừa gửi một ghi chú mới: “${note.mood} ${form.title.trim()}”`, 'notes');
+      setForm({ title: '', content: '', mood: '❤️', isTimeCapsule: false, openDate: '' });
+      setShowAdd(false);
+    } catch (e: any) {
+      console.error(e);
+      alert(`Lỗi khi gửi ghi chú: ${e.message}`);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const openNote = async (note: Note) => {
@@ -210,8 +223,10 @@ export default function NotesPanel({ currentUser, partner }: Props) {
               )}
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn-secondary" onClick={() => setShowAdd(false)} style={{ flex: 1 }}>Huỷ</button>
-              <button className="btn-primary" onClick={addNote} style={{ flex: 1 }}>Gửi ghi chú 💌</button>
+              <button className="btn-secondary" onClick={() => setShowAdd(false)} disabled={isSending} style={{ flex: 1 }}>Huỷ</button>
+              <button className="btn-primary" onClick={addNote} disabled={isSending} style={{ flex: 1 }}>
+                {isSending ? 'Đang gửi... 💌' : 'Gửi ghi chú 💌'}
+              </button>
             </div>
           </div>
         </div>
