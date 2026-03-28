@@ -432,27 +432,28 @@ export default function AlbumPanel({ currentUser }: Props) {
             <button className="btn-icon" onClick={() => setLightboxIndex(null)} style={{ color: '#fff', fontSize: 24, width: 44, height: 44, background: 'rgba(255,255,255,0.1)' }}>✕</button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '0 80px', position: 'relative', gap: 16 }} onClick={e => e.stopPropagation()}>
-            {/* Prev */}
-            {selectedAlbum.photos.length > 1 && (
-              <button className="btn-icon" onClick={(e) => { e.stopPropagation(); setEditingCaption(null); setLightboxIndex((lightboxIndex - 1 + selectedAlbum.photos.length) % selectedAlbum.photos.length); }}
-                style={{ position: 'absolute', left: 20, width: 50, height: 50, color: '#fff', fontSize: 28, background: 'rgba(255,255,255,0.1)' }}>
-                ‹
-              </button>
-            )}
+          <div 
+            className="lightbox-container"
+            style={{ 
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+              width: '100%', height: '100%', position: 'relative', gap: 12 
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
 
             {/* Photo Container with Animation */}
-            <div key={lightboxIndex} style={{ animation: 'fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', display: 'inline-block' }}>
+            <div key={lightboxIndex} style={{ animation: 'fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '100%' }}>
               <img src={selectedAlbum.photos[lightboxIndex].url} alt=""
                 style={{
-                  maxWidth: '100%', maxHeight: '70vh', borderRadius: 8,
-                  boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
+                  maxWidth: '100%', maxHeight: '85vh', borderRadius: 8,
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)',
+                  objectFit: 'contain'
                 }} />
 
               {/* Delete btn */}
               <button onClick={(e) => { e.stopPropagation(); deletePhoto(selectedAlbum.photos[lightboxIndex].id); }}
                 style={{
-                  position: 'absolute', bottom: 12, right: 12,
+                  position: 'absolute', top: 12, right: 12,
                   background: 'rgba(220,38,38,0.8)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12, backdropFilter: 'blur(4px)',
                   transition: 'background 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                 }}
@@ -667,7 +668,11 @@ export default function AlbumPanel({ currentUser }: Props) {
           .photo-card-inner { padding: 5px 5px 12px 5px; border-radius: 3px; }
           .photo-polaroid { margin-bottom: 20px; }
         }
+        .lightbox-container {
+          padding: 0 80px;
+        }
         @media (max-width: 600px) {
+          .lightbox-container { padding: 0 10px; }
           .photo-polaroid { --rotate-deg: 0deg !important; }
         }
 
