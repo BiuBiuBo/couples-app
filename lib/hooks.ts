@@ -61,73 +61,73 @@ export function useCouple(coupleId?: string) {
 }
 
 // COLLECTION HOOKS
-export function useAlbums(coupleId?: string) {
+export function useAlbums(coupleId?: string, enabled: boolean = true) {
   const [albums, setAlbums] = useState<Album[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/albums`), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => setAlbums(snap.docs.map(d => d.data() as Album)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return albums;
 }
 
-export function useBucketList(coupleId?: string) {
+export function useBucketList(coupleId?: string, enabled: boolean = true) {
   const [items, setItems] = useState<BucketItem[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/bucketList`), orderBy('addedAt', 'desc'));
     return onSnapshot(q, (snap) => setItems(snap.docs.map(d => d.data() as BucketItem)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return items;
 }
 
-export function useNotes(coupleId?: string) {
+export function useNotes(coupleId?: string, enabled: boolean = true) {
   const [notes, setNotes] = useState<Note[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/notes`), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => setNotes(snap.docs.map(d => d.data() as Note)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return notes;
 }
 
-export function useAnniversaries(coupleId?: string) {
+export function useAnniversaries(coupleId?: string, enabled: boolean = true) {
   const [anniversaries, setAnniversaries] = useState<Anniversary[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/anniversaries`));
     return onSnapshot(q, (snap) => setAnniversaries(snap.docs.map(d => d.data() as Anniversary)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return anniversaries;
 }
 
-export function useMoods(coupleId?: string) {
+export function useMoods(coupleId?: string, enabled: boolean = true) {
   const [moods, setMoods] = useState<MoodEntry[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/moods`), orderBy('date', 'desc'));
     return onSnapshot(q, (snap) => setMoods(snap.docs.map(d => d.data() as MoodEntry)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return moods;
 }
 
-export function usePromises(coupleId?: string) {
+export function usePromises(coupleId?: string, enabled: boolean = true) {
   const [promises, setPromises] = useState<PromiseType[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/promises`), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => setPromises(snap.docs.map(d => d.data() as PromiseType)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return promises;
 }
 
-export function useNotifications(coupleId?: string) {
+export function useNotifications(coupleId?: string, enabled: boolean = true) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   useEffect(() => {
-    if (!coupleId) return;
+    if (!coupleId || !enabled) return;
     const q = query(collection(db, `couples/${coupleId}/notifications`), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => setNotifications(snap.docs.map(d => d.data() as AppNotification)));
-  }, [coupleId]);
+  }, [coupleId, enabled]);
   return notifications;
 }
 

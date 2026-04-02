@@ -234,6 +234,15 @@ export default function LandingPage() {
     <div className={styles.landing}>
       <canvas ref={canvasRef} className={styles.canvas} />
 
+      {/* FAST REDIRECT LOADER */}
+      {user && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+           <div className="animate-heartbeat" style={{ fontSize: 60, marginBottom: 24 }}>💖</div>
+           <div className="spinner" style={{ width: 40, height: 40, marginBottom: 16 }}></div>
+           <p style={{ color: 'var(--text-secondary)', fontSize: 15, letterSpacing: 1 }}>Đang vào không gian của hai bạn...</p>
+        </div>
+      )}
+
       {/* Nav */}
       <nav className={styles.nav}>
         <div className={styles.navLogo}>

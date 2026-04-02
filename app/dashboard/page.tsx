@@ -274,13 +274,13 @@ export default function DashboardPage() {
         {/* Panel content */}
         <div className="dashboard-panel-content" style={{ flex: 1, padding: '28px' }}>
           {activeView === 'dashboard' && <DashboardOverview couple={couple} currentUser={currentUser} partner={partner} onNavigate={setActiveView} />}
-          {activeView === 'albums' && <AlbumPanel currentUser={currentUser} />}
-          {activeView === 'bucket-list' && <BucketListPanel currentUser={currentUser} partner={partner} />}
-          {activeView === 'notes' && <NotesPanel currentUser={currentUser} partner={partner} />}
-          {activeView === 'anniversaries' && <AnniversaryPanel couple={couple} currentUser={currentUser} onRefresh={() => {}} />}
-          {activeView === 'mood' && <MoodPanel currentUser={currentUser} partner={partner} onNotify={() => {}} />}
-          {activeView === 'promises' && <PromisesPanel currentUser={currentUser} partner={partner} />}
-          {activeView === 'profile' && <ProfilePanel currentUser={currentUser} partner={partner} onUpdate={() => {}} />}
+          {activeView === 'albums' && <AlbumPanel currentUser={currentUser} enabled={activeView === 'albums'} />}
+          {activeView === 'bucket-list' && <BucketListPanel currentUser={currentUser} partner={partner} enabled={activeView === 'bucket-list'} />}
+          {activeView === 'notes' && <NotesPanel currentUser={currentUser} partner={partner} enabled={activeView === 'notes'} />}
+          {activeView === 'anniversaries' && <AnniversaryPanel couple={couple} currentUser={currentUser} onRefresh={() => {}} enabled={activeView === 'anniversaries'} />}
+          {activeView === 'mood' && <MoodPanel currentUser={currentUser} partner={partner} onNotify={() => {}} enabled={activeView === 'mood'} />}
+          {activeView === 'promises' && <PromisesPanel currentUser={currentUser} partner={partner} enabled={activeView === 'promises'} />}
+          {activeView === 'profile' && <ProfilePanel currentUser={currentUser} partner={partner} onUpdate={() => {}} enabled={activeView === 'profile'} />}
         </div>
       </main>
 
@@ -306,13 +306,19 @@ function DashboardOverview({
   partner: UserProfile | null;
   onNavigate: (v: ActiveView) => void;
 }) {
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowWelcome(false), 30000);
-    return () => clearTimeout(timer);
+    const lastShow = localStorage.getItem('cm_welcome_last');
+    const now = Date.now();
+    // Show only if never shown or last shown > 1 hour ago (3600000ms)
+    if (!lastShow || now - parseInt(lastShow) > 3600000) {
+      setShowWelcome(true);
+      localStorage.setItem('cm_welcome_last', now.toString());
+    }
   }, []);
 
+  // Stats listeners - always active for real-time overview as requested
   const bucketItems = useBucketList(currentUser.coupleId);
   const notes = useNotes(currentUser.coupleId);
   const anns = useAnniversaries(currentUser.coupleId);

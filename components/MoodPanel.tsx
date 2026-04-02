@@ -7,7 +7,7 @@ import Avatar from '@/components/Avatar';
 import type { MoodEntry, UserProfile } from '@/lib/types';
 import { useToast } from '@/providers/ToastProvider';
 
-interface Props { currentUser: UserProfile; partner: UserProfile | null; onNotify?: () => void; }
+interface Props { currentUser: UserProfile; partner: UserProfile | null; onNotify?: () => void; enabled?: boolean; }
 
 const MOODS = [
   { id: 'euphoric', emoji: '🤩', label: 'Hạnh phúc tột đỉnh', color: '#f59e0b' },
@@ -20,9 +20,9 @@ const MOODS = [
 
 type MoodId = typeof MOODS[number]['id'];
 
-export default function MoodPanel({ currentUser, partner, onNotify }: Props) {
+export default function MoodPanel({ currentUser, partner, onNotify, enabled = true }: Props) {
   const today = new Date().toISOString().slice(0, 10);
-  const allMoods = useMoods(currentUser.coupleId);
+  const allMoods = useMoods(currentUser.coupleId, enabled);
   const toast = useToast();
   const [selectedMood, setSelectedMood] = useState<MoodId | null>(null);
   const [note, setNote] = useState('');

@@ -8,10 +8,10 @@ import { formatDate, generateId } from '@/lib/utils';
 import type { Promise, UserProfile } from '@/lib/types';
 import { useToast } from '@/providers/ToastProvider';
 
-interface Props { currentUser: UserProfile; partner: UserProfile | null; }
+interface Props { currentUser: UserProfile; partner: UserProfile | null; enabled?: boolean; }
 
-export default function PromisesPanel({ currentUser, partner }: Props) {
-  const promises = usePromises(currentUser.coupleId);
+export default function PromisesPanel({ currentUser, partner, enabled = true }: Props) {
+  const promises = usePromises(currentUser.coupleId, enabled);
   const toast = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [newText, setNewText] = useState('');

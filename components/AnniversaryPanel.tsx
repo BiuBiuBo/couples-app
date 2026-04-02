@@ -7,7 +7,7 @@ import { formatDate, generateId } from '@/lib/utils';
 import type { Anniversary, CoupleData, UserProfile } from '@/lib/types';
 import { useToast } from '@/providers/ToastProvider';
 
-interface Props { couple: CoupleData | null; currentUser: UserProfile; onRefresh?: () => void; }
+interface Props { couple: CoupleData | null; currentUser: UserProfile; onRefresh?: () => void; enabled?: boolean; }
 
 const EMOJIS = ['💕', '🎂', '🎉', '💍', '🌹', '🏖️', '✈️', '🎵', '🌙', '⭐', '🥂', '🎁'];
 const COLORS = ['#ff4d88', '#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
@@ -27,8 +27,8 @@ function daysUntil(dateStr: string, recurring: boolean): number {
   return Math.round((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export default function AnniversaryPanel({ couple, currentUser, onRefresh }: Props) {
-  const items = useAnniversaries(couple?.id);
+export default function AnniversaryPanel({ couple, currentUser, onRefresh, enabled = true }: Props) {
+  const items = useAnniversaries(couple?.id, enabled);
   const toast = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', date: '', isRecurring: true, emoji: '💕', color: '#ff4d88' });

@@ -7,10 +7,10 @@ import { useToast } from '@/providers/ToastProvider';
 import { generateId, uploadImageString } from '@/lib/utils';
 import type { Album, Photo, UserProfile } from '@/lib/types';
 
-interface Props { currentUser: UserProfile; }
+interface Props { currentUser: UserProfile; enabled?: boolean; }
 
-export default function AlbumPanel({ currentUser }: Props) {
-  const albums = useAlbums(currentUser.coupleId);
+export default function AlbumPanel({ currentUser, enabled = true }: Props) {
+  const albums = useAlbums(currentUser.coupleId, enabled);
   const toast = useToast();
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
   const selectedAlbum = useMemo(() => albums.find(a => a.id === selectedAlbumId) || null, [albums, selectedAlbumId]);

@@ -8,12 +8,12 @@ import type { Note, UserProfile } from '@/lib/types';
 import Avatar from '@/components/Avatar';
 import { useToast } from '@/providers/ToastProvider';
 
-interface Props { currentUser: UserProfile; partner: UserProfile | null; }
+interface Props { currentUser: UserProfile; partner: UserProfile | null; enabled?: boolean; }
 
 const MOODS = ['❤️', '🥰', '😊', '🤭', '🥺', '😔', '🌙', '✨', '💭', '🔥'];
 
-export default function NotesPanel({ currentUser, partner }: Props) {
-  const notes = useNotes(currentUser.coupleId);
+export default function NotesPanel({ currentUser, partner, enabled = true }: Props) {
+  const notes = useNotes(currentUser.coupleId, enabled);
   const toast = useToast();
   const [tab, setTab] = useState<'received' | 'sent'>('received');
   const [showAdd, setShowAdd] = useState(false);

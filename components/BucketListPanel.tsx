@@ -8,7 +8,7 @@ import type { BucketItem, UserProfile } from '@/lib/types';
 import Avatar from '@/components/Avatar';
 import { useToast } from '@/providers/ToastProvider';
 
-interface Props { currentUser: UserProfile; partner: UserProfile | null; }
+interface Props { currentUser: UserProfile; partner: UserProfile | null; enabled?: boolean; }
 
 const CATEGORIES = [
   { id: 'all',       label: 'Tất cả',    emoji: '✨' },
@@ -21,8 +21,8 @@ const CATEGORIES = [
 
 type FilterType = 'all' | 'done' | 'todo';
 
-export default function BucketListPanel({ currentUser, partner }: Props) {
-  const items = useBucketList(currentUser.coupleId);
+export default function BucketListPanel({ currentUser, partner, enabled = true }: Props) {
+  const items = useBucketList(currentUser.coupleId, enabled);
   const toast = useToast();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<BucketItem['category']>('other');

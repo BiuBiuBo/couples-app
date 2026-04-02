@@ -14,6 +14,7 @@ interface Props {
   currentUser: UserProfile;
   partner: UserProfile | null;
   onUpdate: (updated: UserProfile) => void;
+  enabled?: boolean;
 }
 
 const LOVE_LANGUAGES = [
